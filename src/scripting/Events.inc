@@ -544,3 +544,21 @@ stock HookEvents()
 	HookEvent("post_inventory_application", Event_Regenerate, EventHookMode_Post);
 	HookUserMessage(GetUserMessageId("PlayerJarated"), Event_PlayerJarated);
 }
+
+stock UnhookEvents()
+{
+	UnhookEvent("player_death", Event_PlayerDeath, EventHookMode_Pre);
+	UnhookEvent("player_hurt", Event_PlayerHurt, EventHookMode_Pre);
+	UnhookEvent("player_spawn", Event_PlayerSpawn, EventHookMode_PostNoCopy);
+	UnhookEvent("player_team", Event_PlayerTeam);
+	UnhookEvent("sticky_jump", Event_PlayerStickyJump);
+	UnhookEvent("rocket_jump", Event_PlayerRocketJump);
+	UnhookEvent("player_builtobject", Event_PlayerBuiltObject);
+	UnhookEvent("player_changeclass", Event_PlayerChangeClass);
+	UnhookEvent("player_stunned", Event_PlayerStunned);
+	UnhookEvent("break_prop", Event_PropBroken);
+	UnhookEvent("teamplay_round_stalemate", Event_RoundEnd, EventHookMode_PostNoCopy);
+	UnhookEvent("teamplay_round_win", Event_RoundEnd, EventHookMode_PostNoCopy);
+	UnhookEvent("post_inventory_application", Event_Regenerate, EventHookMode_Post);
+	UnhookUserMessage(GetUserMessageId("PlayerJarated"), Event_PlayerJarated);
+}
