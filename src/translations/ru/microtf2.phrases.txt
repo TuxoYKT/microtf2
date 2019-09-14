@@ -1,17 +1,9 @@
 "Phrases"
 {
-	"Startup_Header"
+	"System_Advertisement"
 	{
-		"ru"		"Добро пожаловать в WarioWare!"
-	}
-	"Startup_BodyIntro"
-	{
-		"ru"		"Приготовьтесь, игра скора начнется!"
-	}
-	"Startup_BodyCountdown"
-	{
-		"#format"	"{1:i}"
-		"ru"		"Игра начнется через {1}..."
+		"#format"	"{1:s}"
+		"ru" 		"Вы играете в WarioWare! Версии {1}. Напишите !credits в чат, что бы увидеть авторов режима."
 	}
 	"Hud_Score_Default"
 	{
@@ -21,7 +13,12 @@
 	"Hud_Score_Minigames"
 	{
 		"#format"	"{1:i}"
-		"ru"		"Минигры: {1}"
+		"ru"		"Мини-игры: {1}"
+	}
+	"Hud_Score_TeamScore"
+	{
+		"#format"	"{1:i}"
+		"ru"		"Счет команды: {1}"
 	}
 	"Hud_RoundDisplay"
 	{
@@ -38,27 +35,35 @@
 		"#format"	"{1:s}"
 		"ru"		"{1}'s Тема"
 	}
-	"Hud_SpecialRound_CruterDisplay"
+	"Hud_SpecialRound_CenterDisplay"
 	{
 		"#format"	"{1:s}"
 		"ru"		"ОСОБЫЙ РАУНД: {1}!"
+	}
+	"Hud_SpecialRound_ChatDisplay"
+	{
+		"#format"	"{1:s},{2:s},{3:s}"
+		"ru"		"{1}Текущий особый раунд это... {2}!\n{3}"
 	}
 	"PlayerSpawn_RespawnNotice"
 	{
 		"ru"		"Вы вернетесь в игру после окончания мини-игры или босса."
 	}
-
-	"SuddruDeath_YouHaveBeruKnockedOut"
+	"SuddenDeath_YouHaveBeenKnockedOut"
 	{
 		"ru"		"ВАС ВЫБИЛИ ИЗ ИГРЫ!"
 	}
-	"Grueral_Loser"
+	"LowestScoreWins_ExploitBlocked"
 	{
-		"ru"		"Вы Проиграли!"
+		"ru"		"Вы не можете сменить класс после начала этого раунда! Добавлено 1 очко на ваш счет."
 	}
-	"Grueral_Winner"
+	"General_Loser"
 	{
-		"ru"		"Вы Выйграли!"
+		"ru"		"Вы проиграли!"
+	}
+	"General_Winner"
+	{
+		"ru"		"Вы выиграли!"
 	}
 	"GameOver_SpecialRoundHasFinished"
 	{
@@ -66,11 +71,11 @@
 	}
 	"GameOver_WinnerPrefixSingle"
 	{
-		"ru"		"И Победителем стал..."
+		"ru"		"И победителем стал..."
 	}
 	"GameOver_WinnerPrefixMultiple"
 	{
-		"ru"		"И Победителями стали..."
+		"ru"		"И победителями стали..."
 	}
 	"GameOver_WinnersAnd"
 	{
@@ -78,7 +83,27 @@
 	}
 	"GameOver_WinnerPrefixNoOne"
 	{
-		"ru"		"Победителей нету!"
+		"ru"		"Победителей нет!"
+	}
+	"GameOver_WinnerSuffix"
+	{
+		"#format"	"{1:s},{2:s},{3:s},{4:i}"
+		"ru"		"{1}{2} {3} {green}с {4} очками!"
+	}
+	"GameOver_WinningTeam_Red"
+	{
+		"#format"	"{1:s},{2:i}"
+		"ru"		"{1}Выиграла команда КРАСНЫХ с {2} очками!"
+	}
+	"GameOver_WinningTeam_Blue"
+	{
+		"#format"	"{1:s},{2:i}"
+		"ru"		"{1}Выиграла команда СИНИХ с {2} очками!"
+	}
+	"GameOver_WinningTeam_Stalemate"
+	{
+		"#format"	"{1:s}"
+		"ru"		"{1}Ничья! Оба команды имеют равный счет!"
 	}
 	"Intermission_Header"
 	{
@@ -86,7 +111,12 @@
 	}
 	"Intermission_Body"
 	{
-		"ru"		"Время отдыхать! Проголосуйте за след. карту."
+		"ru"		"Время отдыхать! Проголосуйте за следующую карту."
+	}
+	"Minigame8_CorrectAnswerWas"
+	{
+		"#format"	"{1:s},{2:i}"
+		"ru"		"{1}Правильным ответом был {2}!"
 	}
 	"Minigame9_Caption_SimonSaysTaunt"
 	{
@@ -116,6 +146,10 @@
 	{
 		"ru"		"(Саймон этого не говорил..)
 	}
+	"Minigame10_KamikazeIsHere"
+	{
+		"ru"		"Камикадзе здесь!"
+	}
 	"Minigame13_SpycrabsMustCrouchAndLookup"
 	{
 		"ru"		"Все спайкрабы должны присесть и смотреть вверх!"
@@ -144,7 +178,7 @@
 	{
 		"ru"		"ПОМЕНЯЙТЕ КЛАСС НА ПУЛЕМЕТЧИКА!"
 	}
-	"Minigame19_Caption_ChangeClassrugineer"
+	"Minigame19_Caption_ChangeClassengineer"
 	{
 		"ru"		"ПОМЕНЯЙТЕ КЛАСС НА ИНЖЕНЕРА!"
 	}
@@ -166,6 +200,67 @@
 	}
 	"Minigame20_Caption_Eat"
 	{
-		"ru"		"СЬЕШЬТЕ!"
+		"ru"		"СЪЕШЬТЕ!"
+	}
+"Bossgame7_Caption_Explain"
+	{
+		"ru"		"Пишите каждое слово в чат как можно быстрее, чтобы выжить!"
+	}
+	"Bossgame7_Caption_Start"
+	{
+		"ru"		"НАЧНЁМ!"
+	}
+	"Bossgame7_Caption_TimeRemaining"
+	{
+		"#format"	"{1:i}"
+		"ru"		"== НАБЛЮДАЕМ ==\n\nОсталось времени: {1} секунд"
+	}
+	"Bossgame7_Caption_SayTheWord"
+	{ 
+		"#format"	"{1:s},{2:s},{3:i}"
+		"ru"		"== ПИШИ СЛОВО! ==\n\n{1}\n\nСледующее слово: {2}\nОсталось времени: {3} секунд"
+	}
+	"Bossgame7_Caption_WinnerAnnouncement"
+	{
+		"#format"	"{1:s}"
+		"ru"		"== ОБЬЯВЛЕНИЕ ==\n\nПобедителем стал...\n{1}!"
+	}
+	"Bossgame7_Caption_LevelUpAnnouncement"
+	{
+		"ru"		"== ОБЬЯВЛЕНИЕ == \n\nНОВЫЙ УРОВЕНЬ! ТЕПЕРЬ СЛОВА СТАНУТ ЕЩЕ СЛОЖНЕЕ!"
+	}
+	"Bossgame7_Caption_RoundReview"
+	{
+		"#format"	"{1:s}"
+		"ru"		"== РЕЗУЛЬТАТЫ РАУНДА == \n\nИгроки с наименьшим количеством набранных слов, были...\n{1}"
+	}
+	"Bossgame7_Caption_RoundReview_AndMore"
+	{
+		"#format" 	"{1:s},{2:i}"
+		"ru"		"{1}\nи {2} также..."
+	}
+	"Bossgame7_Caption_RoundReview_EveryoneSurvives"
+	{
+		"#format" 	"{1:s}"
+		"ru"		"{1}никто!\n\nВсе выжили этот раунд!"
+	}
+	"Bossgame7_ClassChangeWarning"
+	{
+		"ru"		"Вы не можете сменить класс после начала босса!"
+	}
+	"SpecialRound16_Caption_Points"
+	{
+		"#format"	"{1:i}"
+		"ru"		"Если вы выиграете эту мини-игру, вы получите {1} очков!"
+	}
+	"SpecialRound17_Caption_Full"
+	{
+		"#format"	"{1:i},{2:i},{3:s}"
+		"ru"		"Оставшийся игроки ({1} из {2})\n{3}"
+	}
+	"SpecialRound17_Caption_AndMore"
+	{
+		"#format"	"{1:s},{2:i}"
+		"ru"		"{1} (и {2} еще)"
 	}
 }
