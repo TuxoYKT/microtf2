@@ -59,11 +59,11 @@
 	}
 	"General_Loser"
 	{
-		"ru"		"Вы проиграли!"
+		"ru"		"ПРОИГРАВШИЙ!"
 	}
 	"General_Winner"
 	{
-		"ru"		"Вы выиграли!"
+		"ru"		"ПОБЕДИТЕЛЬ!"
 	}
 	"GameOver_SpecialRoundHasFinished"
 	{
