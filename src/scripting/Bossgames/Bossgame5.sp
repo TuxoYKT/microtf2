@@ -4,54 +4,55 @@
  * BeatBlock Galaxy by Mario6493
  */
 
-bool Bossgame5_CanCheckPosition;
-bool Bossgame5_BlockState;
-float Bossgame5_Step = 4.0;
+bool g_bBossgame5CanCheckWinArea;
+bool g_bBossgame5BlockState;
+bool g_bBossgame5HasAnyPlayerWon;
+float g_fBossgame5Timer = 4.0;
 
 public void Bossgame5_EntryPoint()
 {
-	AddToForward(GlobalForward_OnMapStart, INVALID_HANDLE, Bossgame5_OnMapStart);
-	AddToForward(GlobalForward_OnTfRoundStart, INVALID_HANDLE, Bossgame5_OnTfRoundStart);
-	AddToForward(GlobalForward_OnMinigameSelectedPre, INVALID_HANDLE, Bossgame5_OnMinigameSelectedPre);
-	AddToForward(GlobalForward_OnMinigameSelected, INVALID_HANDLE, Bossgame5_OnMinigameSelected);
-	AddToForward(GlobalForward_OnPlayerDeath, INVALID_HANDLE, Bossgame5_OnPlayerDeath);
-	AddToForward(GlobalForward_OnBossStopAttempt, INVALID_HANDLE, Bossgame5_OnBossStopAttempt);
+	AddToForward(g_pfOnMapStart, INVALID_HANDLE, Bossgame5_OnMapStart);
+	AddToForward(g_pfOnTfRoundStart, INVALID_HANDLE, Bossgame5_OnTfRoundStart);
+	AddToForward(g_pfOnMinigameSelectedPre, INVALID_HANDLE, Bossgame5_OnMinigameSelectedPre);
+	AddToForward(g_pfOnMinigameSelected, INVALID_HANDLE, Bossgame5_OnMinigameSelected);
+	AddToForward(g_pfOnPlayerDeath, INVALID_HANDLE, Bossgame5_OnPlayerDeath);
+	AddToForward(g_pfOnBossStopAttempt, INVALID_HANDLE, Bossgame5_OnBossStopAttempt);
 }
 
 public void Bossgame5_OnMapStart()
 {
-	PrecacheSound("gemidyne/warioware/bosses/sfx/beatblock_count.mp3", true);
-	PrecacheSound("ui/chime_rd_2base_pos.wav", true);
-	PrecacheSound("ui/hitsound_retro1.wav", true);
+	PreloadSound(BOSSGAME_SFX_BBCOUNT);
+	PreloadSound("ui/chime_rd_2base_pos.wav");
+	PreloadSound("ui/hitsound_retro1.wav");
 }
 
 public void Bossgame5_OnMinigameSelectedPre()
 {
-	if (BossgameID != 5)
+	if (g_iActiveBossgameId != 5)
 	{
 		return;
 	}
 
 	Bossgame5_SwitchYellow();
 
-	Bossgame5_CanCheckPosition = false;
-	Bossgame5_Step = 4.0;
+	g_bBossgame5CanCheckWinArea = false;
+	g_fBossgame5Timer = 4.0;
+	g_bBossgame5HasAnyPlayerWon = false;
 
-	IsBlockingDamage = false;
-	IsOnlyBlockingDamageByPlayers = true;
-	IsBlockingDeathCommands = false;
+	g_eDamageBlockMode = EDamageBlockMode_AllPlayers;
+	g_bIsBlockingKillCommands = false;
 
 	CreateTimer(0.5, Bossgame5_SwitchTimer, _, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 }
 
 public void Bossgame5_OnMinigameSelected(int client)
 {
-	if (BossgameID != 5)
+	if (g_iActiveBossgameId != 5)
 	{
 		return;
 	}
 
-	if (!IsMinigameActive)
+	if (!g_bIsMinigameActive)
 	{
 		return;
 	}
@@ -65,25 +66,24 @@ public void Bossgame5_OnMinigameSelected(int client)
 		player.SetGodMode(false);
 		player.SetCollisionsEnabled(false);
 		player.ResetHealth();
+		player.ResetWeapon(true);
 
-		ResetWeapon(client, true);
+		int column = player.ClientId;
+		int row = 0;
+
+		while (column > 3)
+		{
+			column = column - 3;
+			row = row + 1;
+		}
 
 		float pos[3];
+		pos[0] = -13495.0 + float(column*90);
+		pos[1] = -14510.0 + float(row*85);
+		pos[2] = 490.0;
+
 		float vel[3] = { 0.0, 0.0, 0.0 };
 		float ang[3] = { 0.0, 90.0, 0.0 };
-
-		if (player.Team == TFTeam_Red) // RED
-		{
-			pos[0] = -13436.6;
-			pos[1] = -14211.9;
-			pos[2] = 490.0;
-		}
-		else // BLU
-		{
-			pos[0] = -13180.6;
-			pos[1] = -14211.9;
-			pos[2] = 490.0;
-		}
 
 		TeleportEntity(client, pos, ang, vel);
 	}
@@ -91,12 +91,12 @@ public void Bossgame5_OnMinigameSelected(int client)
 
 public void Bossgame5_OnPlayerDeath(int victimId, int attacker)
 {
-	if (BossgameID != 5)
+	if (g_iActiveBossgameId != 5)
 	{
 		return;
 	}
 
-	if (!IsMinigameActive)
+	if (!g_bIsMinigameActive)
 	{
 		return;
 	}
@@ -105,23 +105,23 @@ public void Bossgame5_OnPlayerDeath(int victimId, int attacker)
 
 	if (victim.IsValid)
 	{
-		PlayerStatus[victim] = PlayerStatus_Failed;
+		victim.Status = PlayerStatus_Failed;
 	}
 }
 
 public void Bossgame5_OnBossStopAttempt()
 {
-	if (BossgameID != 5)
+	if (g_iActiveBossgameId != 5)
 	{
 		return;
 	}
 
-	if (!IsMinigameActive)
+	if (!g_bIsMinigameActive)
 	{
 		return;
 	}
 	
-	Bossgame5_CanCheckPosition = true;
+	g_bBossgame5CanCheckWinArea = true;
 	int alivePlayers = 0;
 	int successfulPlayers = 0;
 	int pendingPlayers = 0;
@@ -134,7 +134,7 @@ public void Bossgame5_OnBossStopAttempt()
 		{
 			alivePlayers++;
 
-			if (PlayerStatus[i] == PlayerStatus_Failed || PlayerStatus[i] == PlayerStatus_NotWon)
+			if (player.Status == PlayerStatus_Failed || player.Status == PlayerStatus_NotWon)
 			{
 				pendingPlayers++;
 			}
@@ -167,49 +167,59 @@ public void Bossgame5_OnTfRoundStart()
 
 		if (strcmp(entityName, "plugin_Bossgame5_WinArea") == 0)
 		{
-			HookSingleEntityOutput(entity, "OnStartTouch", Bossgame5_OnTriggerTouched, false);
+			SDKHook(entity, SDKHook_StartTouch, Bossgame5_OnTriggerTouched);
 			break;
 		}
 	}
 }
 
-public void Bossgame5_OnTriggerTouched(const char[] output, int caller, int activator, float delay)
+public Action Bossgame5_OnTriggerTouched(int entity, int other)
 {
-	if (!Bossgame5_CanCheckPosition)
+	if (!g_bBossgame5CanCheckWinArea)
 	{
-		return;
+		return Plugin_Continue;
 	}
 
-	Player player = new Player(activator);
+	Player player = new Player(other);
 
-	if (player.IsValid && player.IsAlive && IsPlayerParticipant[activator] && PlayerStatus[activator] == PlayerStatus_NotWon)
+	if (player.IsValid && player.IsAlive && player.IsParticipating && player.Status == PlayerStatus_NotWon)
 	{
-		ClientWonMinigame(activator);
+		player.TriggerSuccess();
+
+		if (!g_bBossgame5HasAnyPlayerWon && Config_BonusPointsEnabled())
+		{
+			player.Score++;
+			Bossgame5_NotifyPlayerComplete(player);
+
+			g_bBossgame5HasAnyPlayerWon = true;
+		}
 	}
+
+	return Plugin_Continue;
 }
 
 public Action Bossgame5_SwitchTimer(Handle timer)
 {
-	if (BossgameID == 5 && IsMinigameActive && !IsMinigameEnding) 
+	if (g_iActiveBossgameId == 5 && g_bIsMinigameActive && !g_bIsMinigameEnding) 
 	{
-		Bossgame5_Step -= 0.5;
+		g_fBossgame5Timer -= 0.5;
 
-		if (Bossgame5_Step > 1.5)
+		if (g_fBossgame5Timer > 1.5)
 		{
 			// Silent
 		}
-		else if (Bossgame5_Step > 0)
+		else if (g_fBossgame5Timer > 0)
 		{
-			EmitSoundToAll("gemidyne/warioware/bosses/sfx/beatblock_count.mp3");
+			PlaySoundToAll(BOSSGAME_SFX_BBCOUNT);
 		}
 		else 
 		{
 			PlaySoundToAll("ui/hitsound_retro1.wav");
 
-			Bossgame5_Step = 4.0;
-			Bossgame5_BlockState = !Bossgame5_BlockState;
+			g_fBossgame5Timer = 4.0;
+			g_bBossgame5BlockState = !g_bBossgame5BlockState;
 
-			if (Bossgame5_BlockState)
+			if (g_bBossgame5BlockState)
 			{
 				Bossgame5_SwitchGreen();
 			}
@@ -253,6 +263,34 @@ public void Bossgame5_SendEntityInput(const char[] relayName, bool state)
 		{
 			AcceptEntityInput(entity, input, -1, -1, -1);
 			break;
+		}
+	}
+}
+
+void Bossgame5_NotifyPlayerComplete(Player invoker)
+{
+	char name[64];
+	
+	if (invoker.Team == TFTeam_Red)
+	{
+		Format(name, sizeof(name), "{red}%N{default}", invoker.ClientId);
+	}
+	else if (invoker.Team == TFTeam_Blue)
+	{
+		Format(name, sizeof(name), "{blue}%N{default}", invoker.ClientId);
+	}
+	else
+	{
+		Format(name, sizeof(name), "{white}%N{default}", invoker.ClientId);
+	}
+
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		Player player = new Player(i);
+
+		if (player.IsValid && !player.IsBot)
+		{
+			player.PrintChatText("%T", "Bossgame5_PlayerReachedEndFirst", i, name);
 		}
 	}
 }

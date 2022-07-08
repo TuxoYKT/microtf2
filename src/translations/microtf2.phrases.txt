@@ -2,58 +2,63 @@
 {
 	"System_Advertisement"
 	{
-		"#format"	"{1:s}"
-		"en" 		"You are playing WarioWare! Version {1}. Say !credits in chat to view gamemode credits."
+		"#format"		"{1:s}"
+		"en"		"You are playing WarioWare! Version {1}. Say !credits in chat to view gamemode credits."
 	}
 	"Hud_Score_Default"
 	{
-		"#format"	"{1:i}"
+		"#format"		"{1:i}"
 		"en"		"Score: {1}"
 	}
 	"Hud_Score_Minigames"
 	{
-		"#format"	"{1:i}"
-		"en"		"Minigames: {1}"
+		"#format"		"{1:i}"
+		"en"		"Microgames: {1}"
 	}
 	"Hud_Score_TeamScore"
 	{
-		"#format"	"{1:i}"
+		"#format"		"{1:i}"
 		"en"		"Team Score: {1}"
+	}
+	"Hud_Score_Barrels"
+	{
+		"#format"		"{1:i}"
+		"en"		"Barrels: {1}"
 	}
 	"Hud_RoundDisplay"
 	{
-		"#format"	"{1:i},{2:i}"
+		"#format"		"{1:i},{2:i}"
 		"en"		"Round {1} of {2}"
 	}
 	"Hud_RoundDisplayUnlimited"
 	{
-		"#format"	"{1:i}"
+		"#format"		"{1:i}"
 		"en"		"Round {1}"
 	}
 	"Hud_ThemeDisplay"
 	{
-		"#format"	"{1:s}"
+		"#format"		"{1:s}"
 		"en"		"{1}'s theme"
 	}
 	"Hud_SpecialRound_CenterDisplay"
 	{
-		"#format"	"{1:s}"
+		"#format"		"{1:s}"
 		"en"		"SPECIAL ROUND: {1}!"
 	}
 	"Hud_SpecialRound_ChatDisplay"
 	{
-		"#format"	"{1:s},{2:s},{3:s}"
-		"en"		"{1}The special round condition is... {2}!\n{3}"
+		"#format"		"{1:s},{2:s}"
+		"en"		"The special round condition is... {1}!\n{2}"
 	}
-	"PlayerSpawn_RespawnNotice"
+	"System_PlayerSpawn_RespawnNotice"
 	{
-		"en"		"You will be respawned once the current minigame or boss has finished."
+		"en"		"You will be respawned once the current microgame or bossgame has finished."
 	}
-	"SuddenDeath_YouHaveBeenKnockedOut"
+	"SpecialRound_SuddenDeath_PlayerKnockOutNotification"
 	{
 		"en"		"YOU HAVE BEEN KNOCKED OUT!"
 	}
-	"LowestScoreWins_ExploitBlocked"
+	"System_SpecialRoundBlockClassChange"
 	{
 		"en"		"Changing class is not allowed during this special round! 1 point has been added to your score."
 	}
@@ -64,6 +69,34 @@
 	"General_Winner"
 	{
 		"en"		"Winner!"
+	}
+	"General_SpeedUp"
+	{
+		"en"		"SPEED UP!"
+	}
+	"General_SpeedDown"
+	{
+		"en"		"SPEED DOWN!"
+	}
+	"General_Failure"
+	{
+		"en"		"FAILURE!"
+	}
+	"General_Success"
+	{
+		"en"		"SUCCESS!"
+	}
+	"General_BossTime"
+	{
+		"en"		"BOSS TIME!"
+	}
+	"General_GameOver"
+	{
+		"en"		"GAME OVER!"
+	}
+	"General_SpecialRound"
+	{
+		"en"		"SPECIAL ROUND!"
 	}
 	"GameOver_SpecialRoundHasFinished"
 	{
@@ -79,7 +112,8 @@
 	}
 	"GameOver_WinnersAnd"
 	{
-		"en"		"and"
+		"#format"		"{1:s},{2:s}"
+		"en"		"{1} and {2}{default}"
 	}
 	"GameOver_WinnerPrefixNoOne"
 	{
@@ -87,29 +121,28 @@
 	}
 	"GameOver_WinnerSuffix"
 	{
-		"#format"	"{1:s},{2:s},{3:s},{4:i}"
-		"en"		"{1}{2} {3} {green}with {4} points!"
+		"#format"		"{1:s},{2:s},{3:i}"
+		"en"		"{1} {2} {default}with {3} points!"
 	}
 	"GameOver_WinningTeam_Red"
 	{
-		"#format"	"{1:s},{2:i}"
-		"en"		"{1}The winning team is the RED team with {2} points!"
+		"#format"		"{1:i}"
+		"en"		"The winning team is the RED team with {1} points!"
 	}
 	"GameOver_WinningTeam_Blue"
 	{
-		"#format"	"{1:s},{2:i}"
-		"en"		"{1}The winning team is the BLU team with {2} points!"
+		"#format"		"{1:i}"
+		"en"		"The winning team is the BLU team with {1} points!"
 	}
 	"GameOver_WinningTeam_Stalemate"
 	{
-		"#format"	"{1:s}"
-		"en"		"{1}Stalemate! Both teams have the same points!"
+		"en"		"Stalemate! Both teams have the same points!"
 	}
-	"Intermission_Header"
+	"System_Intermission_Header"
 	{
 		"en"		"Intermission!"
 	}
-	"Intermission_Body"
+	"System_Intermission_Body"
 	{
 		"en"		"Break time! Time to vote for the next map."
 	}
@@ -117,29 +150,93 @@
 	{
 		"en"		"ROCKET JUMP TO THE END!"
 	}
+	"Bossgame1_PlayerReachedEndFirst"
+	{
+		"#format"		"{1:s}"
+		"en"		"{1} reached the top first! (Bonus point!)"
+	}
 	"Bossgame2_Caption"
 	{
 		"en"		"ESCAPE THE FACTORY!"
 	}
+	"Bossgame2_PlayerReachedEndFirst"
+	{
+		"#format"		"{1:s}"
+		"en"		"{1} escaped the factory first! (Bonus point!)"
+	}
 	"Bossgame3_Caption"
 	{
-		"en"		"DEFEAT THE ENEMY TEAM!"
+		"en"		"STAY ON THE GREEN BLOCK!"
 	}
 	"Bossgame4_Caption"
 	{
-		"en"		"DON'T FALL INTO THE WATER"
+		"en"		"DON'T FALL INTO THE WATER!"
 	}
 	"Bossgame5_Caption"
 	{
 		"en"		"REACH THE GOAL!"
 	}
+	"Bossgame5_PlayerReachedEndFirst"
+	{
+		"#format"		"{1:s}"
+		"en"		"{1} reached the goal first! (Bonus point!)"
+	}
 	"Bossgame6_Caption"
 	{
 		"en"		"SHOOT THE MOST BARRELS!"
 	}
-	"Bossgame7_Caption"
+	"Bossgame8_Caption_CountTheProps"
 	{
-		"en"		"" // Leave this as empty.
+		"en"		"COUNT THE PROPS!"
+	}
+	"Bossgame8_Caption_GetReady"
+	{
+		"en"		"GET READY..."
+	}
+	"Bossgame8_Caption_CorrectAnswerWas_Hidden"
+	{
+		"en"		"THE CORRECT ANSWER WAS...\n???"
+	}
+	"Bossgame8_Caption_CorrectAnswerWas_Visible"
+	{
+		"#format"		"{1:i}"
+		"en"		"THE CORRECT ANSWER WAS...\n{1}!"
+	}
+	"Bossgame8_Caption_ChooseARoom"
+	{
+		"#format"		"{1:s},{2:i},{3:i},{4:i},{5:i}"
+		"en"		"How many {1} were there? Enter the correct answer room!\nRoom A: {2}   Room B: {3}   Room C: {4}\nTime remaining: {5}"
+	}
+	"Bossgame8_PropType_Dispensers"
+	{
+		"en"		"Dispensers"
+	}
+	"Bossgame8_PropType_AmmoPacks"
+	{
+		"en"		"Ammo Packs"
+	}
+	"Bossgame8_PropType_Barrels"
+	{
+		"en"		"Barrels"
+	}
+	"Bossgame8_PropType_Chairs"
+	{
+		"en"		"Chairs"
+	}
+	"Bossgame8_Annotation_AnswerRoomA"
+	{
+		"#format"		"{1:i}"
+		"en"		"Room A: {1}"
+	}
+	"Bossgame8_Annotation_AnswerRoomB"
+	{
+		"#format"		"{1:i}"
+		"en"		"Room B: {1}"
+	}
+	"Bossgame8_Annotation_AnswerRoomC"
+	{
+		"#format"		"{1:i}"
+		"en"		"Room C: {1}"
 	}
 	"Minigame1_Caption"
 	{
@@ -163,8 +260,13 @@
 	}
 	"Minigame6_SayTheWord_CaptionFormatted"
 	{
-		"#format"	"{1:s}"
+		"#format"		"{1:s}"
 		"en"		"SAY THE WORD!\n{1}"
+	}
+	"Minigame6_SayTheWord_PlayerSaidWordFirst"
+	{
+		"#format"		"{1:s}"
+		"en"		"{1} said the word first! (Bonus point!)"
 	}
 	"Minigame7_Caption"
 	{
@@ -172,13 +274,18 @@
 	}
 	"Minigame8_CaptionFormatted"
 	{
-		"#format"	"{1:s}"
+		"#format"		"{1:s}"
 		"en"		"ANSWER THE QUESTION!\n{1} = ?"
 	}
 	"Minigame8_CorrectAnswerWas"
 	{
-		"#format"	"{1:s},{2:i}"
-		"en"		"{1}The correct answer was {2}!"
+		"#format"		"{1:i}"
+		"en"		"The correct answer was {1}!"
+	}
+	"Minigame8_PlayerAnsweredFirst"
+	{
+		"#format"		"{1:s}"
+		"en"		"{1} got the correct answer first! (Bonus point!)"
 	}
 	"Minigame9_Caption_SimonSaysTaunt"
 	{
@@ -324,9 +431,17 @@
 	{
 		"en"		"DRINK!"
 	}
+	"Minigame20_Caption_DontDrink"
+	{
+		"en"		"DON'T DRINK!"
+	}
 	"Minigame20_Caption_Eat"
 	{
 		"en"		"EAT!"
+	}
+	"Minigame20_Caption_DontEat"
+	{
+		"en"		"DON'T EAT!"
 	}
 	"Minigame21_Caption"
 	{
@@ -338,7 +453,7 @@
 	}
 	"Minigame23_Caption"
 	{
-		"en"		"DOUBLE JUMP!"
+		"en"		"TAUNT KILL!"
 	}
 	"Minigame24_Caption"
 	{
@@ -347,6 +462,66 @@
 	"Minigame25_Caption"
 	{
 		"en"		"JETPACK!"
+	}
+	"Minigame26_Caption_DontLaugh"
+	{
+		"en"		"DON'T LAUGH!"
+	}
+	"Minigame26_Caption_MakeThemLaugh_Scout"
+	{
+		"en"		"MAKE THE SCOUTS LAUGH!"
+	}
+	"Minigame26_Caption_MakeThemLaugh_Soldier"
+	{
+		"en"		"MAKE THE SOLDIERS LAUGH!"
+	}
+	"Minigame26_Caption_MakeThemLaugh_Pyro"
+	{
+		"en"		"MAKE THE PYROS LAUGH!"
+	}
+	"Minigame26_Caption_MakeThemLaugh_Demoman"
+	{
+		"en"		"MAKE THE DEMOMEN LAUGH!"
+	}
+	"Minigame26_Caption_MakeThemLaugh_Engineer"
+	{
+		"en"		"MAKE THE ENGINEERS LAUGH!"
+	}
+	"Minigame26_Caption_MakeThemLaugh_Medic"
+	{
+		"en"		"MAKE THE MEDICS LAUGH!"
+	}
+	"Minigame26_Caption_MakeThemLaugh_Sniper"
+	{
+		"en"		"MAKE THE SNIPERS LAUGH!"
+	}
+	"Minigame26_Caption_MakeThemLaugh_Spy"
+	{
+		"en"		"MAKE THE SPIES LAUGH!"
+	}
+	"Minigame27_Caption"
+	{
+		"en"		"HIT AN ENEMY!"
+	}
+	"Minigame28_Caption"
+	{
+		"en"		"BOMB JUMP ONTO THE PLATFORM!"
+	}
+	"Minigame29_Caption"
+	{
+		"en"		"DON'T TOUCH ANYONE!"
+	}
+	"Minigame30_Caption_EatASandvich"
+	{
+		"en"		"EAT A SANDVICH!"
+	}
+	"Minigame30_Caption_HealAMedic"
+	{
+		"en"		"HEAL A MEDIC!"
+	}
+	"Bossgame7_Caption_TypeTheWords"
+	{
+		"en"		"TYPE THE WORDS!"
 	}
 	"Bossgame7_Caption_Explain"
 	{
@@ -358,17 +533,17 @@
 	}
 	"Bossgame7_Caption_TimeRemaining"
 	{
-		"#format"	"{1:i}"
+		"#format"		"{1:i}"
 		"en"		"== SPECTATING ==\n\nTime remaining: {1} seconds"
 	}
 	"Bossgame7_Caption_SayTheWord"
 	{
-		"#format"	"{1:s},{2:s},{3:i}"
+		"#format"		"{1:s},{2:s},{3:i}"
 		"en"		"== TYPE THE WORD! ==\n\n{1}\n\nNext word: {2}\nTime remaining: {3} seconds"
 	}
 	"Bossgame7_Caption_WinnerAnnouncement"
 	{
-		"#format"	"{1:s}"
+		"#format"		"{1:s}"
 		"en"		"== ANNOUNCEMENT ==\n\nThe winner is...\n{1}!"
 	}
 	"Bossgame7_Caption_LevelUpAnnouncement"
@@ -377,17 +552,17 @@
 	}
 	"Bossgame7_Caption_RoundReview"
 	{
-		"#format"	"{1:s}"
+		"#format"		"{1:s}"
 		"en"		"== ROUND REVIEW == \n\nThe players with the lowest number of words typed were...\n{1}"
 	}
 	"Bossgame7_Caption_RoundReview_AndMore"
 	{
-		"#format" 	"{1:s},{2:i}"
+		"#format"		"{1:s},{2:i}"
 		"en"		"{1}\nand {2} more..."
 	}
 	"Bossgame7_Caption_RoundReview_EveryoneSurvives"
 	{
-		"#format" 	"{1:s}"
+		"#format"		"{1:s}"
 		"en"		"{1}no one!\n\nEveryone survives another round!"
 	}
 	"Bossgame7_ClassChangeWarning"
@@ -500,11 +675,11 @@
 	}
 	"SpecialRound13_Name"
 	{
-		"en"		"Birds only"
+		"en"		"Skeletons only"
 	}
 	"SpecialRound13_Description"
 	{
-		"en"		"Archimedes! No!"
+		"en"		"No skin allowed in this round!"
 	}
 	"SpecialRound14_Name"
 	{
@@ -532,8 +707,8 @@
 	}
 	"SpecialRound16_Caption_Points"
 	{
-		"#format"	"{1:i}"
-		"en"		"If you win this minigame, you will be awarded {1} points!"
+		"#format"		"{1:i}"
+		"en"		"If you win this microgame, you will be awarded {1} points!"
 	}
 	"SpecialRound17_Name"
 	{
@@ -545,12 +720,12 @@
 	}
 	"SpecialRound17_Caption_Full"
 	{
-		"#format"	"{1:i},{2:i},{3:s}"
+		"#format"		"{1:i},{2:i},{3:s}"
 		"en"		"Current players ({1} of {2})\n{3}"
 	}
 	"SpecialRound17_Caption_AndMore"
 	{
-		"#format"	"{1:s},{2:i}"
+		"#format"		"{1:s},{2:i}"
 		"en"		"{1} (and {2} more)"
 	}
 	"SpecialRound18_Name"
@@ -576,5 +751,13 @@
 	"SpecialRound20_Description"
 	{
 		"en"		"There's no break in between microgames this round!"
+	}
+	"SpecialRound21_Name"
+	{
+		"en"		"Team Fortress 64"
+	}
+	"SpecialRound21_Description"
+	{
+		"en"		"Hey! Where did my polygons go?"
 	}
 }

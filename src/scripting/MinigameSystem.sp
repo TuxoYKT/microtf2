@@ -4,40 +4,34 @@
  * Implements a System for Minigames.
  */
 
-#include <sourcemod>
+int g_iMinigamesLoadedCount = 0;
+int g_iBossgamesLoadedCount = 0;
 
-#define MAXIMUM_MINIGAMES 64
-#define MINIGAME_CAPTION_LENGTH 256
+bool g_bMinigameIsEnabled[MAXIMUM_MINIGAMES];
+char g_sDynamicCaptionFunctionName[MAXIMUM_MINIGAMES][64];
+bool g_bMinigameHasDynamicCaption[MAXIMUM_MINIGAMES];
+bool g_bMinigameBlockedSpecialRound[MAXIMUM_MINIGAMES][SPR_MAX];
+bool g_bMinigameRequiresMultiplePlayers[MAXIMUM_MINIGAMES];
+float g_fMinigameBlockedOnSpeedsGreaterThan[MAXIMUM_MINIGAMES];
+int g_iMinigameMaximumParticipantCount[MAXIMUM_MINIGAMES];
+int g_iMinigameMinimumParticipantCount[MAXIMUM_MINIGAMES];
 
-int MinigamesLoaded = 0;
-int BossgamesLoaded = 0;
+bool g_bBossgameIsEnabled[MAXIMUM_MINIGAMES];
+bool g_bBossgameUsesCaption[MAXIMUM_MINIGAMES];
+char g_sBossgameDynamicCaptionFunctionName[MAXIMUM_MINIGAMES][64];
+bool g_bBossgameHasDynamicCaption[MAXIMUM_MINIGAMES];
+bool g_bBossgameBlockedSpecialRound[MAXIMUM_MINIGAMES][SPR_MAX];
+bool g_bBossgameRequiresMultiplePlayers[MAXIMUM_MINIGAMES];
+float g_fBossgameBlockedOnSpeedsGreaterThan[MAXIMUM_MINIGAMES];
 
-bool MinigameIsEnabled[MAXIMUM_MINIGAMES];
-char MinigameCaptions[MAXIMUM_MINIGAMES][MINIGAME_CAPTION_LENGTH];
-char MinigameDynamicCaptionFunctions[MAXIMUM_MINIGAMES][64];
-bool MinigameCaptionIsDynamic[MAXIMUM_MINIGAMES];
-bool MinigameBlockedSpecialRounds[MAXIMUM_MINIGAMES][SPR_MAX];
-bool MinigameRequiresMultiplePlayers[MAXIMUM_MINIGAMES];
-float MinigameBlockedSpeedsHigherThan[MAXIMUM_MINIGAMES];
+char g_sMinigameBgm[MAXIMUM_MINIGAMES][MAX_PATH_LENGTH];
+float g_fMinigameBgmLength[MAXIMUM_MINIGAMES];
 
-bool BossgameIsEnabled[MAXIMUM_MINIGAMES];
-char BossgameCaptions[MAXIMUM_MINIGAMES][MINIGAME_CAPTION_LENGTH];
-char BossgameDynamicCaptionFunctions[MAXIMUM_MINIGAMES][64];
-bool BossgameCaptionIsDynamic[MAXIMUM_MINIGAMES];
-bool BossgameBlockedSpecialRounds[MAXIMUM_MINIGAMES][SPR_MAX];
-bool BossgameRequiresMultiplePlayers[MAXIMUM_MINIGAMES];
-float BossgameBlockedSpeedsHigherThan[MAXIMUM_MINIGAMES];
+char g_sBossgameBgm[MAXIMUM_MINIGAMES][MAX_PATH_LENGTH];
+float g_fBossgameBgmLength[MAXIMUM_MINIGAMES];
 
-char MinigameMusic[MAXIMUM_MINIGAMES][128];
-float MinigameMusicLength[MAXIMUM_MINIGAMES];
-
-char BossgameMusic[MAXIMUM_MINIGAMES][128];
-float BossgameLength[MAXIMUM_MINIGAMES];
-
-char MinigameCaption[MAXPLAYERS][MINIGAME_CAPTION_LENGTH];
-
-ArrayList PlayedMinigamePool;
-ArrayList PlayedBossgamePool;
+ArrayList g_hPlayedMinigamePool;
+ArrayList g_hPlayedBossgamePool;
 
 #include "MinigameStocks.sp"
 
@@ -67,6 +61,11 @@ ArrayList PlayedBossgamePool;
 #include "Minigames/Minigame23.sp"
 #include "Minigames/Minigame24.sp"
 #include "Minigames/Minigame25.sp"
+#include "Minigames/Minigame26.sp"
+#include "Minigames/Minigame27.sp"
+#include "Minigames/Minigame28.sp"
+#include "Minigames/Minigame29.sp"
+#include "Minigames/Minigame30.sp"
 
 // Bossgames
 #include "Bossgames/Bossgame1.sp"
@@ -76,6 +75,7 @@ ArrayList PlayedBossgamePool;
 #include "Bossgames/Bossgame5.sp"
 #include "Bossgames/Bossgame6.sp"
 #include "Bossgames/Bossgame7.sp"
+#include "Bossgames/Bossgame8.sp"
 
 public void InitializeMinigames()
 {
@@ -86,110 +86,101 @@ public void InitializeMinigames()
 	LoadMinigameData();
 	LoadBossgameData();
 
-	LogMessage("Minigame System initialized with %d Minigame(s) and %d Bossgame(s).", MinigamesLoaded, BossgamesLoaded);
+	LogMessage("Minigame System initialized with %d Minigame(s) and %d Bossgame(s).", g_iMinigamesLoadedCount, g_iBossgamesLoadedCount);
 
-	AddToForward(GlobalForward_OnMapStart, INVALID_HANDLE, MinigameSystem_OnMapStart);
-	AddToForward(GlobalForward_OnMapEnd, INVALID_HANDLE, MinigameSystem_OnMapEnd);
+	AddToForward(g_pfOnMapStart, INVALID_HANDLE, MinigameSystem_OnMapStart);
+	AddToForward(g_pfOnMapEnd, INVALID_HANDLE, MinigameSystem_OnMapEnd);
 }
 
 public void MinigameSystem_OnMapStart()
 {
-	PlayedMinigamePool = new ArrayList();
-	PlayedBossgamePool = new ArrayList();
+	g_hPlayedMinigamePool = new ArrayList();
+	g_hPlayedBossgamePool = new ArrayList();
 
-	Handle sndfile = INVALID_HANDLE;
-
-	for (int i = 1; i <= MinigamesLoaded; i++)
+	for (int i = 1; i <= g_iMinigamesLoadedCount; i++)
 	{
-		if (strlen(MinigameMusic[i]) == 0)
+		if (strlen(g_sMinigameBgm[i]) == 0)
 		{
 			continue;
 		}
 
-		PreloadSound(MinigameMusic[i]);
-		sndfile = OpenSoundFile(MinigameMusic[i]);
-
-		if (sndfile == INVALID_HANDLE)
-		{
-			LogError("Failed to get sound length for Minigame %d - %s", i, MinigameMusic[i]);
-		}
-		else
-		{
-			MinigameMusicLength[i] = GetSoundLengthFloat(sndfile);
-			CloseHandle(sndfile);
-		}
+		PreloadSound(g_sMinigameBgm[i]);
 	}
 
-	for (int i = 1; i <= BossgamesLoaded; i++)
+	for (int i = 1; i <= g_iBossgamesLoadedCount; i++)
 	{
-		if (strlen(BossgameMusic[i]) == 0)
+		if (strlen(g_sBossgameBgm[i]) == 0)
 		{
 			continue;
 		}
 
-		PreloadSound(BossgameMusic[i]);
+		PreloadSound(g_sBossgameBgm[i]);
 	}
 }
 
 public void MinigameSystem_OnMapEnd()
 {
-	PlayedMinigamePool.Close();
-	PlayedBossgamePool.Close();
+	g_hPlayedMinigamePool.Close();
+	g_hPlayedBossgamePool.Close();
 }
 
 public void LoadMinigameData()
 {
 	char funcName[64];
-	char manifestPath[128];
+	char file[128];
 
 	// Our method of initializing minigames is:
 	// Each minigame has a method called Minigame<NUMBER>_EntryPoint
 	// This method is invoked and allows the minigame to add itself to the Minigame-cycle and add itself to forwards.
 
 	// Determine count of Minigames that are available.
-	BuildPath(Path_SM, manifestPath, sizeof(manifestPath), "data/microtf2/Minigames.txt");
+	BuildPath(Path_SM, file, sizeof(file), "data/microtf2/Minigames.txt");
 
-	Handle kv = CreateKeyValues("Minigames");
-	FileToKeyValues(kv, manifestPath);
- 
-	if (KvGotoFirstSubKey(kv))
+	KeyValues kv = new KeyValues("Minigames");
+
+	if (!kv.ImportFromFile(file))
 	{
-		int i = 0;
+		SetFailState("Unable to read Minigames.txt from data/microtf2/");
+		kv.Close();
+		return;
+	}
 
+	if (kv.GotoFirstSubKey())
+	{
 		do
 		{
-			i++;
+			int i = GetIdFromSectionName(kv);
 
-			MinigameIsEnabled[i] = KvGetNum(kv, "Enabled", 0) == 1;
+			g_iMinigamesLoadedCount++;
 
-			KvGetString(kv, "EntryPoint", funcName, sizeof(funcName));
+			g_bMinigameIsEnabled[i] = kv.GetNum("Enabled", 0) == 1;
+
+			kv.GetString("EntryPoint", funcName, sizeof(funcName));
 
 			Function func = GetFunctionByName(INVALID_HANDLE, funcName);
 			if (func != INVALID_FUNCTION)
 			{
-				MinigamesLoaded++;
-
 				Call_StartFunction(INVALID_HANDLE, func);
 				Call_Finish();
 			}
 			else
 			{
-				LogError("Unable to find EntryPoint for Minigame #%i with name: \"%s\"", i, funcName);
+				g_bMinigameIsEnabled[i] = false;
+				LogError("Unable to find EntryPoint for Minigame #%i with name: \"%s\". This minigame will not be run.", i, funcName);
 				continue;
 			}
 
-			KvGetString(kv, "BackgroundMusic", MinigameMusic[i], 128);
-			KvGetString(kv, "Caption", MinigameCaptions[i], 64);
+			kv.GetString("BackgroundMusic", g_sMinigameBgm[i], 128);
+			g_fMinigameBgmLength[i] = kv.GetFloat("BackgroundMusic_Length");
+			g_bMinigameHasDynamicCaption[i] = kv.GetNum("CaptionIsDynamic", 0) == 1;
 
-			MinigameCaptionIsDynamic[i] = (KvGetNum(kv, "CaptionIsDynamic", 0) == 1);
-
-			if (MinigameCaptionIsDynamic[i])
+			if (g_bMinigameHasDynamicCaption[i])
 			{
-				KvGetString(kv, "DynamicCaptionMethod", MinigameDynamicCaptionFunctions[i], 64);
+				kv.GetString("DynamicCaptionMethod", g_sDynamicCaptionFunctionName[i], 64);
 			}
 
 			char blockedSpecialRounds[64];
-			KvGetString(kv, "BlockedSpecialRounds", blockedSpecialRounds, sizeof(blockedSpecialRounds));
+			kv.GetString("BlockedSpecialRounds", blockedSpecialRounds, sizeof(blockedSpecialRounds));
 
 			if (strlen(blockedSpecialRounds) > 0)
 			{
@@ -200,68 +191,74 @@ public void LoadMinigameData()
 				{
 					int id = StringToInt(specialRoundIds[j]);
 
-					MinigameBlockedSpecialRounds[i][id] = true;
+					g_bMinigameBlockedSpecialRound[i][id] = true;
 				}
 			}
 
-			MinigameRequiresMultiplePlayers[i] = KvGetNum(kv, "RequiresMultiplePlayers", 0) == 1;
-			MinigameBlockedSpeedsHigherThan[i] = KvGetFloat(kv, "BlockedOnSpeedsHigherThan", 0.0);
+			g_bMinigameRequiresMultiplePlayers[i] = kv.GetNum("RequiresMultiplePlayers", 0) == 1;
+			g_fMinigameBlockedOnSpeedsGreaterThan[i] = kv.GetFloat("BlockedOnSpeedsHigherThan", 0.0);
+			g_iMinigameMaximumParticipantCount[i] = kv.GetNum("MaximumPlayerCount", 0);
+			g_iMinigameMinimumParticipantCount[i] = kv.GetNum("MinimumPlayerCount", 0);
 		}
-		while (KvGotoNextKey(kv));
+		while (kv.GotoNextKey());
 	}
  
-	CloseHandle(kv);
+	kv.Close();
 }
 
 public void LoadBossgameData()
 {
 	char funcName[64];
-	char manifestPath[128];
-	BuildPath(Path_SM, manifestPath, sizeof(manifestPath), "data/microtf2/Bossgames.txt");
+	char file[128];
+	BuildPath(Path_SM, file, sizeof(file), "data/microtf2/Bossgames.txt");
 
-	Handle kv = CreateKeyValues("Bossgames");
-	FileToKeyValues(kv, manifestPath);
- 
-	if (KvGotoFirstSubKey(kv))
+	KeyValues kv = new KeyValues("Bossgames");
+
+	if (!kv.ImportFromFile(file))
 	{
-		int i = 0;
-
+		SetFailState("Unable to read Bossgames.txt from data/microtf2/");
+		kv.Close();
+		return;
+	}
+ 
+	if (kv.GotoFirstSubKey())
+	{
 		do
 		{
-			i++;
+			int i = GetIdFromSectionName(kv);
 
-			BossgameIsEnabled[i] = KvGetNum(kv, "Enabled", 0) == 1;
+			g_bBossgameIsEnabled[i] = kv.GetNum("Enabled", 0) == 1;
+			g_iBossgamesLoadedCount++;
 
 			// Get EntryPoint first of all!
-			KvGetString(kv, "EntryPoint", funcName, sizeof(funcName));
+			kv.GetString("EntryPoint", funcName, sizeof(funcName));
 
 			Function func = GetFunctionByName(INVALID_HANDLE, funcName);
 			if (func != INVALID_FUNCTION)
 			{
-				BossgamesLoaded++;
-
 				Call_StartFunction(INVALID_HANDLE, func);
 				Call_Finish();
 			}
 			else
 			{
-				LogError("Unable to find EntryPoint for Bossgame #%i with name: \"%s\"", i, funcName);
+				g_bBossgameIsEnabled[i] = false;
+				LogError("Unable to find EntryPoint for Bossgame #%i with name: \"%s\". This bossgame will not be run.", i, funcName);
 				continue;
 			}
 
-			KvGetString(kv, "BackgroundMusic", BossgameMusic[i], 128);
-			KvGetString(kv, "Caption", BossgameCaptions[i], 64);
+			kv.GetString("BackgroundMusic", g_sBossgameBgm[i], 128);
 
-			BossgameLength[i] = KvGetFloat(kv, "Duration", 30.0);
-			BossgameCaptionIsDynamic[i] = (KvGetNum(kv, "CaptionIsDynamic", 0) == 1);
+			g_fBossgameBgmLength[i] = kv.GetFloat("Duration", 30.0);
+			g_bBossgameUsesCaption[i] = kv.GetNum("UsesCaption", 0) == 1;
+			g_bBossgameHasDynamicCaption[i] = kv.GetNum("CaptionIsDynamic", 0) == 1;
 
-			if (BossgameCaptionIsDynamic[i])
+			if (g_bBossgameHasDynamicCaption[i])
 			{
-				KvGetString(kv, "DynamicCaptionMethod", BossgameDynamicCaptionFunctions[i], 64);
+				kv.GetString("DynamicCaptionMethod", g_sBossgameDynamicCaptionFunctionName[i], 64);
 			}
 
 			char blockedSpecialRounds[64];
-			KvGetString(kv, "BlockedSpecialRounds", blockedSpecialRounds, sizeof(blockedSpecialRounds));
+			kv.GetString("BlockedSpecialRounds", blockedSpecialRounds, sizeof(blockedSpecialRounds));
 
 			if (strlen(blockedSpecialRounds) > 0)
 			{
@@ -272,222 +269,223 @@ public void LoadBossgameData()
 				{
 					int id = StringToInt(specialRoundIds[j]);
 
-					BossgameBlockedSpecialRounds[i][id] = true;
+					g_bBossgameBlockedSpecialRound[i][id] = true;
 				}
 			}
 
-			BossgameRequiresMultiplePlayers[i] = KvGetNum(kv, "RequiresMultiplePlayers", 0) == 1;
-			BossgameBlockedSpeedsHigherThan[i] = KvGetFloat(kv, "BlockedOnSpeedsHigherThan", 0.0);
+			g_bBossgameRequiresMultiplePlayers[i] = kv.GetNum("RequiresMultiplePlayers", 0) == 1;
+			g_fBossgameBlockedOnSpeedsGreaterThan[i] = kv.GetFloat("BlockedOnSpeedsHigherThan", 0.0);
 		}
-		while (KvGotoNextKey(kv));
+		while (kv.GotoNextKey());
 	}
  
-	CloseHandle(kv);
+	kv.Close();
+}
+
+public void ResetPlayedGamePools()
+{
+	g_hPlayedMinigamePool.Clear();
+	g_hPlayedBossgamePool.Clear();
 }
 
 public void DoSelectMinigame()
 {
-	int forcedMinigameID = GetConVarInt(ConVar_MTF2ForceMinigame);
+	int forcedMinigameId = g_hConVarPluginForceMinigame.IntValue;
 	int rollCount = 0;
 
-	if (SpecialRoundID == 8)
+	if (g_iSpecialRoundId == 8)
 	{
-		PreviousMinigameID = 0;
-		MinigameID = 8;
+		g_iLastPlayedMinigameId = 0;
+		g_iActiveMinigameId = 8;
 	}
-	else if (forcedMinigameID > 0 && forcedMinigameID <= MinigamesLoaded)
+	else if (forcedMinigameId > 0 && forcedMinigameId <= g_iMinigamesLoadedCount)
 	{
-		PreviousMinigameID = 0;
-		MinigameID = forcedMinigameID;
+		g_iLastPlayedMinigameId = 0;
+		g_iActiveMinigameId = forcedMinigameId;
 	}
 	else
 	{
 		do
 		{
-			MinigameID = GetRandomInt(1, MinigamesLoaded);
+			g_iActiveMinigameId = GetRandomInt(1, g_iMinigamesLoadedCount);
 			rollCount++;
 
-			if (MinigamesLoaded == 1)
+			if (g_iMinigamesLoadedCount == 1)
 			{
-				PreviousMinigameID = 0;
+				g_iLastPlayedMinigameId = 0;
 			}
 
-			bool recentlyPlayed = PlayedMinigamePool.FindValue(MinigameID) >= 0;
+			bool recentlyPlayed = g_hPlayedMinigamePool.FindValue(g_iActiveMinigameId) >= 0;
 
 			if (recentlyPlayed)
 			{
-				MinigameID = PreviousMinigameID;
+				g_iActiveMinigameId = g_iLastPlayedMinigameId;
 
-				if (rollCount >= MinigamesLoaded)
+				if (rollCount > (g_iMinigamesLoadedCount * 2))
 				{
-					PlayedMinigamePool.Clear();
+					// Essentially, start from the beginning again until we're cleared at end of the round
+					g_hPlayedMinigamePool.Erase(0);
 				}
 			}
 			else
 			{
-				if (!MinigameIsEnabled[MinigameID])
+				if (!g_bMinigameIsEnabled[g_iActiveMinigameId])
 				{
-					MinigameID = PreviousMinigameID;
+					g_iActiveMinigameId = g_iLastPlayedMinigameId;
 				}
 
-				if (GamemodeID == SPR_GAMEMODEID && MinigameBlockedSpecialRounds[MinigameID][SpecialRoundID])
+				if (g_iActiveGamemodeId == SPR_GAMEMODEID && g_bMinigameBlockedSpecialRound[g_iActiveMinigameId][g_iSpecialRoundId])
 				{
 					// If minigame is blocked on this special round, re-roll
-					MinigameID = PreviousMinigameID;
+					#if defined DEBUG
+					PrintToChatAll("[MINIGAMESYS] Chose minigame %i, but rerolling as its blocked on special round #", g_iActiveMinigameId, g_iSpecialRoundId);
+					#endif
+
+					g_iActiveMinigameId = g_iLastPlayedMinigameId;
 				}
-				else if (MinigameRequiresMultiplePlayers[MinigameID])
+				else if (g_bMinigameRequiresMultiplePlayers[g_iActiveMinigameId] && (g_iActiveRedParticipantCount == 0 || g_iActiveBlueParticipantCount == 0)) 
 				{
-					int redParticipants = 0;
-					int blueParticipants = 0;
+					// Minigame requires players on both teams
+					#if defined DEBUG
+					PrintToChatAll("[MINIGAMESYS] Chose minigame %i, but rerolling as we need players on both teams", g_iActiveMinigameId);
+					#endif
 
-					for (int j = 1; j <= MaxClients; j++)
-					{
-						Player player = new Player(j);
-
-						if (player.IsValid && player.IsParticipating)
-						{
-							switch (player.Team)
-							{
-								case TFTeam_Red:
-									redParticipants++;
-
-								case TFTeam_Blue:
-									blueParticipants++;
-							}
-						}
-					}
-
-					if (redParticipants == 0 || blueParticipants == 0)
-					{
-						// Minigame requires players on both teams
-						MinigameID = PreviousMinigameID;
-					}
+					g_iActiveMinigameId = g_iLastPlayedMinigameId;
 				}
-				else if (MinigameBlockedSpeedsHigherThan[MinigameID] > 0.0 && SpeedLevel > MinigameBlockedSpeedsHigherThan[MinigameID])
+				else if (g_fMinigameBlockedOnSpeedsGreaterThan[g_iActiveMinigameId] > 0.0 && g_fActiveGameSpeed > g_fMinigameBlockedOnSpeedsGreaterThan[g_iActiveMinigameId])
 				{
-					MinigameID = PreviousMinigameID;
+					// Minigame cannot run on speeds higher than specified
+					#if defined DEBUG
+					PrintToChatAll("[MINIGAMESYS] Chose minigame %i, but rerolling as speed level exceeds maximum", g_iActiveMinigameId);
+					#endif
+
+					g_iActiveMinigameId = g_iLastPlayedMinigameId;
+				}
+				else if (g_iMinigameMaximumParticipantCount[g_iActiveMinigameId] > 0 && g_iActiveParticipantCount > g_iMinigameMaximumParticipantCount[g_iActiveMinigameId])
+				{
+					// Current participant count exceeds maximum participant count specified for minigame
+					#if defined DEBUG
+					PrintToChatAll("[MINIGAMESYS] Chose minigame %i, but rerolling as active participant count exceeds maximum permitted", g_iActiveMinigameId);
+					#endif
+
+					g_iActiveMinigameId = g_iLastPlayedMinigameId;
+				}
+				else if (g_iMinigameMinimumParticipantCount[g_iActiveMinigameId] > 0 && g_iActiveParticipantCount < g_iMinigameMinimumParticipantCount[g_iActiveMinigameId])
+				{
+					// Current participant count does not meet minimum requirement for minigame
+					#if defined DEBUG
+					PrintToChatAll("[MINIGAMESYS] Chose minigame %i, but rerolling as active participant count does not meet minimum required for minigame", g_iActiveMinigameId);
+					#endif
+
+					g_iActiveMinigameId = g_iLastPlayedMinigameId;
 				}
 			}
 		}
-		while (MinigameID == PreviousMinigameID);
+		while (g_iActiveMinigameId == g_iLastPlayedMinigameId);
 
-		PlayedMinigamePool.Push(MinigameID);
+		g_hPlayedMinigamePool.Push(g_iActiveMinigameId);
 
 		#if defined DEBUG
-		PrintToChatAll("[MINIGAMESYS] Chose minigame %i, minigame pool count: %i", MinigameID, PlayedMinigamePool.Length);
+		PrintToChatAll("[MINIGAMESYS] Chose minigame %i, minigame pool count: %i", g_iActiveMinigameId, g_hPlayedMinigamePool.Length);
 		#endif
 	}
 
-	PluginForward_SendMinigameSelected(MinigameID);
+	PluginForward_SendMinigameSelected(g_iActiveMinigameId);
 }
 
 public void DoSelectBossgame()
 {
-	int forcedBossgameID = GetConVarInt(ConVar_MTF2ForceBossgame);
+	int forcedBossgameId = g_hConVarPluginForceBossgame.IntValue;
 	int rollCount = 0;
 
-	if (forcedBossgameID > 0)
+	if (forcedBossgameId > 0 && forcedBossgameId <= g_iBossgamesLoadedCount)
 	{
-		PreviousBossgameID = 0;
-		BossgameID = forcedBossgameID;
+		g_iLastPlayedBossgameId = 0;
+		g_iActiveBossgameId = forcedBossgameId;
 	}
 	else
 	{
 		do
 		{
-			BossgameID = GetRandomInt(1, BossgamesLoaded);
+			g_iActiveBossgameId = GetRandomInt(1, g_iBossgamesLoadedCount);
 			rollCount++;
 
-			if (BossgamesLoaded == 1)
+			if (g_iBossgamesLoadedCount == 1)
 			{
-				PreviousBossgameID = 0;
+				g_iLastPlayedBossgameId = 0;
 			}
 
-			bool recentlyPlayed = PlayedBossgamePool.FindValue(BossgameID) >= 0;
+			bool recentlyPlayed = g_hPlayedBossgamePool.FindValue(g_iActiveBossgameId) >= 0;
 
 			if (recentlyPlayed)
 			{
-				BossgameID = PreviousBossgameID;
+				g_iActiveBossgameId = g_iLastPlayedBossgameId;
 
-				if (rollCount >= BossgamesLoaded)
+				if (rollCount > (g_iBossgamesLoadedCount * 2))
 				{
-					PlayedBossgamePool.Clear();
+					// Essentially, start from the beginning again until we're cleared at end of the round
+					g_hPlayedBossgamePool.Erase(0);
 				}
 			}
 			else
 			{
-				if (!BossgameIsEnabled[BossgameID])
+				if (!g_bBossgameIsEnabled[g_iActiveBossgameId])
 				{
-					BossgameID = PreviousBossgameID;
+					g_iActiveBossgameId = g_iLastPlayedBossgameId;
 				}
 
-				if (GamemodeID == SPR_GAMEMODEID && BossgameBlockedSpecialRounds[BossgameID][SpecialRoundID])
+				if (g_iActiveGamemodeId == SPR_GAMEMODEID && g_bBossgameBlockedSpecialRound[g_iActiveBossgameId][g_iSpecialRoundId])
 				{
 					// If bossgame is blocked on this special round, re-roll
-					BossgameID = PreviousBossgameID;
+					g_iActiveBossgameId = g_iLastPlayedBossgameId;
 				}
-				else if (BossgameRequiresMultiplePlayers[BossgameID])
+				else if (g_bBossgameRequiresMultiplePlayers[g_iActiveBossgameId])
 				{
-					int redParticipants = 0;
-					int blueParticipants = 0;
-
-					for (int j = 1; j <= MaxClients; j++)
-					{
-						Player player = new Player(j);
-
-						if (player.IsValid && player.IsParticipating)
-						{
-							switch (player.Team)
-							{
-								case TFTeam_Red:
-									redParticipants++;
-
-								case TFTeam_Blue:
-									blueParticipants++;
-							}
-						}
-					}
-
-					if (redParticipants == 0 || blueParticipants == 0)
+					if (g_iActiveRedParticipantCount == 0 || g_iActiveBlueParticipantCount == 0)
 					{
 						// Bossgame requires players on both teams
-						BossgameID = PreviousBossgameID;
+						g_iActiveBossgameId = g_iLastPlayedBossgameId;
 					}
 				}
-				else if (BossgameBlockedSpeedsHigherThan[BossgameID] > 0.0 && SpeedLevel > BossgameBlockedSpeedsHigherThan[BossgameID])
+				else if (g_fBossgameBlockedOnSpeedsGreaterThan[g_iActiveBossgameId] > 0.0 && g_fActiveGameSpeed > g_fBossgameBlockedOnSpeedsGreaterThan[g_iActiveBossgameId])
 				{
-					BossgameID = PreviousBossgameID;
+					g_iActiveBossgameId = g_iLastPlayedBossgameId;
 				}
 			}
 		}
-		while (BossgameID == PreviousBossgameID);
+		while (g_iActiveBossgameId == g_iLastPlayedBossgameId);
 
-		PlayedBossgamePool.Push(BossgameID);
+		g_hPlayedBossgamePool.Push(g_iActiveBossgameId);
 	}
 
 	#if defined DEBUG
-	PrintToChatAll("[MINIGAMESYS] Chose bossgame %i, bossgame pool count: %i", BossgameID, PlayedBossgamePool.Length);
+	PrintToChatAll("[MINIGAMESYS] Chose bossgame %i, bossgame pool count: %i", g_iActiveBossgameId, g_hPlayedBossgamePool.Length);
 	#endif
 
-	PluginForward_SendBossgameSelected(BossgameID);
+	PluginForward_SendBossgameSelected(g_iActiveBossgameId);
 }
 
-public bool TrySpeedChangeEvent()
+public void CalculateActiveParticipantCount()
 {
-	if (!Special_AreSpeedEventsEnabled())
-	{
-		return false;
-	}
+	g_iActiveRedParticipantCount = 0;
+	g_iActiveBlueParticipantCount = 0;
 
-	if (MinigamesPlayed > 2 && SpeedLevel < 2.3 && MinigamesPlayed < BossGameThreshold && MinigamesPlayed >= NextMinigamePlayedSpeedTestThreshold)
+	for (int j = 1; j <= MaxClients; j++)
 	{
-		if (GetRandomInt(0, 2) == 1)
+		Player player = new Player(j);
+
+		if (player.IsValid && player.IsParticipating)
 		{
-			NextMinigamePlayedSpeedTestThreshold = MinigamesPlayed + 2;
+			switch (player.Team)
+			{
+				case TFTeam_Red:
+					g_iActiveRedParticipantCount++;
 
-			return true;
+				case TFTeam_Blue:
+					g_iActiveBlueParticipantCount++;
+			}
 		}
 	}
 
-	return false;
+	g_iActiveParticipantCount = g_iActiveRedParticipantCount + g_iActiveBlueParticipantCount;
 }

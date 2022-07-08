@@ -5,82 +5,91 @@
  * with the gamemode.
  */
 
-Handle PluginForward_IntermissionStartMapVote;
-Handle PluginForward_IntermissionHasMapVoteEnded;
-Handle PluginForward_EventOnMinigameSelected;
-Handle PluginForward_EventOnBossgameSelected;
-Handle PluginForward_EventOnPlayerWinMinigame;
-Handle PluginForward_EventOnPlayerFailedMinigame;
-Handle PluginForward_EventOnPlayerWinBossgame;
-Handle PluginForward_EventOnPlayerFailedBossgame;
-Handle PluginForward_EventOnPlayerWinRound;
-Handle PluginForward_EventOnPlayerLoseRound;
-Handle PluginForward_EventOnGamemodeChanged;
-Handle PluginForward_EventOnSpeedChange;
-Handle PluginForward_EventOnSpecialRoundSelected;
+GlobalForward g_nfIntermissionStartMapVote;
+GlobalForward g_nfIntermissionHasMapVoteEnded;
+GlobalForward g_nfEventOnMinigameSelected;
+GlobalForward g_nfEventOnBossgameSelected;
+GlobalForward g_nfEventOnPlayerWinMinigame;
+GlobalForward g_nfEventOnPlayerFailedMinigame;
+GlobalForward g_nfEventOnPlayerWinBossgame;
+GlobalForward g_nfEventOnPlayerFailedBossgame;
+GlobalForward g_nfEventOnPlayerWinRound;
+GlobalForward g_nfEventOnPlayerLoseRound;
+GlobalForward g_nfEventOnGamemodeChanged;
+GlobalForward g_nfEventOnSpeedChange;
+GlobalForward g_nfEventOnSpecialRoundSelected;
 
-stock void InitializePluginForwards()
+void InitializePluginForwards()
 {
-	PluginForward_IntermissionStartMapVote = CreateGlobalForward("WarioWare_Intermission_StartMapVote", ET_Ignore);
-	PluginForward_IntermissionHasMapVoteEnded = CreateGlobalForward("WarioWare_Intermission_HasMapVoteEnded", ET_Single);
-	PluginForward_EventOnMinigameSelected = CreateGlobalForward("WarioWare_Event_OnMinigameSelected", ET_Ignore, Param_Any);
-	PluginForward_EventOnBossgameSelected = CreateGlobalForward("WarioWare_Event_OnBossgameSelected", ET_Ignore, Param_Any);
-	PluginForward_EventOnPlayerWinMinigame = CreateGlobalForward("WarioWare_Event_OnPlayerWinMinigame", ET_Ignore, Param_Any, Param_Any);
-	PluginForward_EventOnPlayerFailedMinigame = CreateGlobalForward("WarioWare_Event_OnPlayerFailedMinigame", ET_Ignore, Param_Any, Param_Any);
-	PluginForward_EventOnPlayerWinBossgame = CreateGlobalForward("WarioWare_Event_OnPlayerWinBossgame", ET_Ignore, Param_Any, Param_Any);
-	PluginForward_EventOnPlayerFailedBossgame = CreateGlobalForward("WarioWare_Event_OnPlayerFailedBossgame", ET_Ignore, Param_Any, Param_Any);
-	PluginForward_EventOnPlayerWinRound = CreateGlobalForward("WarioWare_Event_OnPlayerWinRound", ET_Ignore, Param_Any, Param_Any);
-	PluginForward_EventOnPlayerLoseRound = CreateGlobalForward("WarioWare_Event_OnPlayerLoseRound", ET_Ignore, Param_Any, Param_Any);
-	PluginForward_EventOnGamemodeChanged = CreateGlobalForward("WarioWare_Event_OnGamemodeChanged", ET_Ignore, Param_Any);
-	PluginForward_EventOnSpeedChange = CreateGlobalForward("WarioWare_Event_OnSpeedChange", ET_Ignore, Param_Float);
-	PluginForward_EventOnSpecialRoundSelected = CreateGlobalForward("WarioWare_Event_OnSpecialRoundSelected", ET_Ignore, Param_Any);
+	g_nfIntermissionStartMapVote = new GlobalForward("WarioWare_Intermission_StartMapVote", ET_Ignore);
+	g_nfIntermissionHasMapVoteEnded = new GlobalForward("WarioWare_Intermission_HasMapVoteEnded", ET_Single);
+	g_nfEventOnMinigameSelected = new GlobalForward("WarioWare_Event_OnMinigameSelected", ET_Ignore, Param_Any);
+	g_nfEventOnBossgameSelected = new GlobalForward("WarioWare_Event_OnBossgameSelected", ET_Ignore, Param_Any);
+	g_nfEventOnPlayerWinMinigame = new GlobalForward("WarioWare_Event_OnPlayerWinMinigame", ET_Ignore, Param_Any, Param_Any);
+	g_nfEventOnPlayerFailedMinigame = new GlobalForward("WarioWare_Event_OnPlayerFailedMinigame", ET_Ignore, Param_Any, Param_Any);
+	g_nfEventOnPlayerWinBossgame = new GlobalForward("WarioWare_Event_OnPlayerWinBossgame", ET_Ignore, Param_Any, Param_Any);
+	g_nfEventOnPlayerFailedBossgame = new GlobalForward("WarioWare_Event_OnPlayerFailedBossgame", ET_Ignore, Param_Any, Param_Any);
+	g_nfEventOnPlayerWinRound = new GlobalForward("WarioWare_Event_OnPlayerWinRound", ET_Ignore, Param_Any, Param_Any);
+	g_nfEventOnPlayerLoseRound = new GlobalForward("WarioWare_Event_OnPlayerLoseRound", ET_Ignore, Param_Any, Param_Any);
+	g_nfEventOnGamemodeChanged = new GlobalForward("WarioWare_Event_OnGamemodeChanged", ET_Ignore, Param_Any);
+	g_nfEventOnSpeedChange = new GlobalForward("WarioWare_Event_OnSpeedChange", ET_Ignore, Param_Float);
+	g_nfEventOnSpecialRoundSelected = new GlobalForward("WarioWare_Event_OnSpecialRoundSelected", ET_Ignore, Param_Any);
 }
 
-stock void InitializePluginNatives()
+void InitializePluginNatives()
 {
 	CreateNative("WarioWare_GetMaxRounds", Native_WarioWare_GetMaxRounds);
 	CreateNative("WarioWare_SetMaxRounds", Native_WarioWare_SetMaxRounds);
 }
 
-stock void RemovePluginForwardsFromMemory()
+public bool PluginForward_HasMapIntegrationLoaded()
 {
-	SafelyRemoveAllFromForward(PluginForward_IntermissionStartMapVote);
-	SafelyRemoveAllFromForward(PluginForward_IntermissionHasMapVoteEnded);
+	return GetForwardFunctionCount(g_nfIntermissionStartMapVote) > 0 && GetForwardFunctionCount(g_nfIntermissionHasMapVoteEnded) > 0;
 }
 
 public void PluginForward_StartMapVote()
 {
-	Call_StartForward(PluginForward_IntermissionStartMapVote);
+	if (GetForwardFunctionCount(g_nfIntermissionStartMapVote) == 0)
+	{
+		return;
+	}
+
+	Call_StartForward(g_nfIntermissionStartMapVote);
 	Call_Finish();
 }
 
 public bool PluginForward_HasMapVoteEnded()
 {
-	bool voteIsInProgress = false;
+	if (GetForwardFunctionCount(g_nfIntermissionHasMapVoteEnded) > 0)
+	{
+		bool voteIsInProgress = false;
 
-	Call_StartForward(PluginForward_IntermissionHasMapVoteEnded);
-	Call_Finish(voteIsInProgress);
+		Call_StartForward(g_nfIntermissionHasMapVoteEnded);
+		Call_Finish(voteIsInProgress);
 
-	return voteIsInProgress;
+		return voteIsInProgress;
+	}
+	
+	return true;
 }
 
 public void PluginForward_SendMinigameSelected(int minigameId)
 {
-	Call_StartForward(PluginForward_EventOnMinigameSelected);
+	Call_StartForward(g_nfEventOnMinigameSelected);
 	Call_PushCell(minigameId);
 	Call_Finish();
 }
 
 public void PluginForward_SendBossgameSelected(int bossgameId)
 {
-	Call_StartForward(PluginForward_EventOnBossgameSelected);
+	Call_StartForward(g_nfEventOnBossgameSelected);
 	Call_PushCell(bossgameId);
 	Call_Finish();
 }
 
 public void PluginForward_SendPlayerWinMinigame(int client, int minigameId)
 {
-	Call_StartForward(PluginForward_EventOnPlayerWinMinigame);
+	Call_StartForward(g_nfEventOnPlayerWinMinigame);
 	Call_PushCell(client);
 	Call_PushCell(minigameId);
 	Call_Finish();
@@ -88,7 +97,7 @@ public void PluginForward_SendPlayerWinMinigame(int client, int minigameId)
 
 public void PluginForward_SendPlayerFailedMinigame(int client, int minigameId)
 {
-	Call_StartForward(PluginForward_EventOnPlayerFailedMinigame);
+	Call_StartForward(g_nfEventOnPlayerFailedMinigame);
 	Call_PushCell(client);
 	Call_PushCell(minigameId);
 	Call_Finish();
@@ -96,7 +105,7 @@ public void PluginForward_SendPlayerFailedMinigame(int client, int minigameId)
 
 public void PluginForward_SendPlayerWinBossgame(int client, int bossgameId)
 {
-	Call_StartForward(PluginForward_EventOnPlayerWinBossgame);
+	Call_StartForward(g_nfEventOnPlayerWinBossgame);
 	Call_PushCell(client);
 	Call_PushCell(bossgameId);
 	Call_Finish();
@@ -104,7 +113,7 @@ public void PluginForward_SendPlayerWinBossgame(int client, int bossgameId)
 
 public void PluginForward_SendPlayerFailedBossgame(int client, int bossgameId)
 {
-	Call_StartForward(PluginForward_EventOnPlayerFailedBossgame);
+	Call_StartForward(g_nfEventOnPlayerFailedBossgame);
 	Call_PushCell(client);
 	Call_PushCell(bossgameId);
 	Call_Finish();
@@ -112,7 +121,7 @@ public void PluginForward_SendPlayerFailedBossgame(int client, int bossgameId)
 
 public void PluginForward_SendPlayerWinRound(int client, int score)
 {
-	Call_StartForward(PluginForward_EventOnPlayerWinRound);
+	Call_StartForward(g_nfEventOnPlayerWinRound);
 	Call_PushCell(client);
 	Call_PushCell(score);
 	Call_Finish();
@@ -120,7 +129,7 @@ public void PluginForward_SendPlayerWinRound(int client, int score)
 
 public void PluginForward_SendPlayerLoseRound(int client, int score)
 {
-	Call_StartForward(PluginForward_EventOnPlayerLoseRound);
+	Call_StartForward(g_nfEventOnPlayerLoseRound);
 	Call_PushCell(client);
 	Call_PushCell(score);
 	Call_Finish();
@@ -128,35 +137,40 @@ public void PluginForward_SendPlayerLoseRound(int client, int score)
 
 public void PluginForward_SendGamemodeChanged(int gamemodeId)
 {
-	Call_StartForward(PluginForward_EventOnGamemodeChanged);
+	Call_StartForward(g_nfEventOnGamemodeChanged);
 	Call_PushCell(gamemodeId);
 	Call_Finish();
 }
 
 public void PluginForward_SendSpeedChange(float speed)
 {
-	Call_StartForward(PluginForward_EventOnSpeedChange);
+	Call_StartForward(g_nfEventOnSpeedChange);
 	Call_PushFloat(speed);
 	Call_Finish();
 }
 
 public void PluginForward_SendSpecialRoundSelected(int id)
 {
-	Call_StartForward(PluginForward_EventOnSpecialRoundSelected);
+	Call_StartForward(g_nfEventOnSpecialRoundSelected);
 	Call_PushCell(id);
 	Call_Finish();
 }
 
 public int Native_WarioWare_GetMaxRounds(Handle plugin, int numParams)
 {
-	return MaxRounds;
+	return g_iMaxRoundsPlayable;
 }
 
 public int Native_WarioWare_SetMaxRounds(Handle plugin, int numParams)
 {
 	int value = GetNativeCell(1);
 
-	SetConVarInt(ConVar_MTF2MaxRounds, value);
+	if (value < 0)
+	{
+		value = 0;
+	}
+
+	g_hConVarPluginMaxRounds.IntValue = value;
 
 	return 0;
 }

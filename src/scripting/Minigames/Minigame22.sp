@@ -4,41 +4,30 @@
  * Stay on the ground!
  */
 
-bool Minigame22_CanCheckConditions = false;
-
 public void Minigame22_EntryPoint()
 {
-	AddToForward(GlobalForward_OnMinigameSelectedPre, INVALID_HANDLE, Minigame22_OnMinigameSelectedPre);
-	AddToForward(GlobalForward_OnMinigameSelected, INVALID_HANDLE, Minigame22_OnMinigameSelected);
-	AddToForward(GlobalForward_OnPlayerTakeDamage, INVALID_HANDLE, Minigame22_OnPlayerTakeDamage);
-	AddToForward(GlobalForward_OnGameFrame, INVALID_HANDLE, Minigame22_OnGameFrame);
-	AddToForward(GlobalForward_OnMinigameFinish, INVALID_HANDLE, Minigame22_OnMinigameFinish);
+	AddToForward(g_pfOnMinigameSelectedPre, INVALID_HANDLE, Minigame22_OnMinigameSelectedPre);
+	AddToForward(g_pfOnMinigameSelected, INVALID_HANDLE, Minigame22_OnMinigameSelected);
+	AddToForward(g_pfOnPlayerTakeDamage, INVALID_HANDLE, Minigame22_OnPlayerTakeDamage);
+	AddToForward(g_pfOnMinigameFinishPre, INVALID_HANDLE, Minigame22_OnMinigameFinishPre);
 }
 
 public void Minigame22_OnMinigameSelectedPre()
 {
-	if (MinigameID == 22)
+	if (g_iActiveMinigameId == 22)
 	{
-		IsBlockingDamage = false;
-		Minigame22_CanCheckConditions = false;
-		
-		CreateTimer(2.0, Timer_Minigame22_AllowConditions);
+		g_eDamageBlockMode = EDamageBlockMode_Nothing;
 	}
-}
-
-public Action Timer_Minigame22_AllowConditions(Handle timer)
-{
-	Minigame22_CanCheckConditions = true;
 }
 
 public void Minigame22_OnMinigameSelected(int client)
 {
-	if (MinigameID != 22)
+	if (g_iActiveMinigameId != 22)
 	{
 		return;
 	}
 
-	if (!IsMinigameActive)
+	if (!g_bIsMinigameActive)
 	{
 		return;
 	}
@@ -52,27 +41,28 @@ public void Minigame22_OnMinigameSelected(int client)
 		player.SetGodMode(false);
 		player.SetHealth(3000);
 
-		GiveWeapon(client, 18);
-		TF2_AddCondition(client, TFCond_Kritzkrieged, 4.0);
+		player.GiveWeapon(18);
+		player.SetWeaponPrimaryAmmoCount(20);
+		player.AddCondition(TFCond_Kritzkrieged, 4.0);
 	}
 }
 
-public void Minigame22_OnPlayerTakeDamage(int victimId, int attackerId, float damage)
+public DamageBlockResults Minigame22_OnPlayerTakeDamage(int victimId, int attackerId, float damage, int damageCustom)
 {
-	if (MinigameID != 22)
+	if (g_iActiveMinigameId != 22)
 	{
-		return;
+		return EDamageBlockResult_DoNothing;
 	}
 
-	if (!IsMinigameActive)
+	if (!g_bIsMinigameActive)
 	{
-		return;
+		return EDamageBlockResult_DoNothing;
 	}
 
 	Player attacker = new Player(attackerId);
 	Player victim = new Player(victimId);
 
-	if (attacker.IsValid && victim.IsValid)
+	if (attacker.IsValid && victim.IsValid && attacker.IsParticipating && victim.IsParticipating)
 	{
 		float ang[3];
 		float vel[3];
@@ -80,18 +70,22 @@ public void Minigame22_OnPlayerTakeDamage(int victimId, int attackerId, float da
 		GetClientEyeAngles(attackerId, ang);
 		GetEntPropVector(victimId, Prop_Data, "m_vecVelocity", vel);
 
-		vel[0] -= 300.0 * Cosine(DegToRad(ang[1])) * -1.0 * damage*0.01;
-		vel[1] -= 300.0 * Sine(DegToRad(ang[1])) * -1.0 * damage*0.01;
-		vel[2] += 450.0;
+		vel[0] -= 150.0 * Cosine(DegToRad(ang[1])) * -1.0 * damage*0.01;
+		vel[1] -= 150.0 * Sine(DegToRad(ang[1])) * -1.0 * damage*0.01;
+		vel[2] += 275.0;
 
 		TeleportEntity(victimId, NULL_VECTOR, ang, vel);
 	}
+
+	return EDamageBlockResult_DoNothing;
 }
 
-public void Minigame22_OnGameFrame()
+public void Minigame22_OnMinigameFinishPre()
 {
-	if (IsMinigameActive && MinigameID == 22 && Minigame22_CanCheckConditions)
+	if (g_iActiveMinigameId == 22)
 	{
+		g_bIsBlockingKillCommands = false;
+
 		for (int i = 1; i <= MaxClients; i++)
 		{
 			Player player = new Player(i);
@@ -100,27 +94,16 @@ public void Minigame22_OnGameFrame()
 			{
 				if (!(GetEntityFlags(i) & FL_ONGROUND))
 				{
+					SlapPlayer(i, 5000, false);
 					player.Status = PlayerStatus_Failed;
-					player.Kill();
+				}
+				else
+				{
+					player.TriggerSuccess();
 				}
 			}
 		}
+
+		g_bIsBlockingKillCommands = true;
 	}
 }
-
-public void Minigame22_OnMinigameFinish()
-{
-	if (MinigameID == 22)
-	{
-		for (int i = 1; i <= MaxClients; i++)
-		{
-			Player player = new Player(i);
-
-			if (player.IsValid && player.IsParticipating && player.IsAlive && (GetEntityFlags(i) & FL_ONGROUND))
-			{
-				ClientWonMinigame(i);
-			}
-		}
-	}
-}
-

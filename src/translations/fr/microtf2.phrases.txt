@@ -2,68 +2,101 @@
 {
 	"System_Advertisement"
 	{
-		"#format"	"{1:s}"
+		"#format"		"{1:s}"
 		"fr"		"Vous jouez à WarioWare ! Version {1}. Tapez !credits dans le chat pour voir les crédits."
 	}
 	"Hud_Score_Default"
 	{
-		"#format"	"{1:i}"
+		"#format"		"{1:i}"
 		"fr"		"Score : {1}"
 	}
 	"Hud_Score_Minigames"
 	{
-		"#format"	"{1:i}"
+		"#format"		"{1:i}"
 		"fr"		"Mini-jeu : {1}"
 	}
 	"Hud_Score_TeamScore"
 	{
-		"#format"	"{1:i}"
+		"#format"		"{1:i}"
 		"fr"		"Score de l'équipe : {1}"
+	}
+	"Hud_Score_Barrels"
+	{
+		"#format"		"{1:i}"
+		"fr"		"Tonneaux : {1}"
 	}
 	"Hud_RoundDisplay"
 	{
-		"#format"	"{1:i},{2:i}"
+		"#format"		"{1:i},{2:i}"
 		"fr"		"Manche {1} sur {2}"
 	}
 	"Hud_RoundDisplayUnlimited"
 	{
-		"#format"	"{1:i}"
+		"#format"		"{1:i}"
 		"fr"		"Manche {1}"
 	}
 	"Hud_ThemeDisplay"
 	{
-		"#format"	"{1:s}"
+		"#format"		"{1:s}"
 		"fr"		"Thème de {1}"
 	}
 	"Hud_SpecialRound_CenterDisplay"
 	{
-		"#format"	"{1:s}"
-		"fr"		"MANCHE SPÉCIALE : {1}!"
+		"#format"		"{1:s}"
+		"fr"		"MANCHE SPÉCIALE : {1} !"
 	}
 	"Hud_SpecialRound_ChatDisplay"
 	{
-		"#format"	"{1:s},{2:s},{3:s}"
-		"fr"		"{1}La manche spéciale est... {2} !\n{3}"
+		"#format"		"{1:s},{2:s}"
+		"fr"		"La manche spéciale est... {1} !\n{2}"
 	}
-	"PlayerSpawn_RespawnNotice"
+	"System_PlayerSpawn_RespawnNotice"
 	{
 		"fr"		"Vous serez respawn quand le mini-jeu ou le boss aura fini."
 	}
-	"SuddenDeath_YouHaveBeenKnockedOut"
+	"SpecialRound_SuddenDeath_PlayerKnockOutNotification"
 	{
 		"fr"		"VOUS AVEZ ÉTÉ ÉLIMINÉ !"
 	}
-	"LowestScoreWins_ExploitBlocked"
+	"System_SpecialRoundBlockClassChange"
 	{
 		"fr"		"Changer de classe n'est pas autorisé durant cette manche spéciale ! 1 point a été rajouté à votre score."
 	}
 	"General_Loser"
 	{
-		"fr"		"Perdu !"
+		"fr"		"Perdant !"
 	}
 	"General_Winner"
 	{
-		"fr"		"Gagné !"
+		"fr"		"Gagnant !"
+	}
+	"General_SpeedUp"
+	{
+		"fr"		"ON ACCÉLÈRE !"
+	}
+	"General_SpeedDown"
+	{
+		"fr"		"ON RALENTIT !"
+	}
+	"General_Failure"
+	{
+		"fr"		"ÉCHEC !"
+	}
+	"General_Success"
+	{
+		"fr"		"RÉUSSITE !"
+	}
+	"General_BossTime"
+	{
+		"fr"		"MOMENT DU BOSS !"
+	}
+	"General_GameOver"
+	{
+		"fr"		"FIN DE LA MANCHE !"
+	}
+	"General_SpecialRound"
+	{
+		"fr"		"MANCHE SPÉCIALE !"
 	}
 	"GameOver_SpecialRoundHasFinished"
 	{
@@ -79,7 +112,8 @@
 	}
 	"GameOver_WinnersAnd"
 	{
-		"fr"		"et"
+		"#format"		"{1:s},{2:s}"
+		"fr"		"{1} et {2}{default}"
 	}
 	"GameOver_WinnerPrefixNoOne"
 	{
@@ -87,29 +121,28 @@
 	}
 	"GameOver_WinnerSuffix"
 	{
-		"#format"	"{1:s},{2:s},{3:s},{4:i}"
-		"fr"		"{1}{2} {3} {green}avec {4} points !"
+		"#format"		"{1:s},{2:s},{3:i}"
+		"fr"		"{1} {2} {default}avec {3} points !"
 	}
 	"GameOver_WinningTeam_Red"
 	{
-		"#format"	"{1:s},{2:i}"
-		"fr"		"{1}L'équipe gagnante est RED avec {2} points !"
+		"#format"		"{1:i}"
+		"fr"		"L'équipe gagnante est RED avec {1} points !"
 	}
 	"GameOver_WinningTeam_Blue"
 	{
-		"#format"	"{1:s},{2:i}"
-		"fr"		"{1}L'équipe gagnante est BLU avec {2} points !"
+		"#format"		"{1:i}"
+		"fr"		"L'équipe gagnante est BLU avec {1} points !"
 	}
 	"GameOver_WinningTeam_Stalemate"
 	{
-		"#format"	"{1:s}"
-		"fr"		"{1}Égalité ! Les deux équipes ont le même nombre de points !"
+		"fr"		"Égalité ! Les deux équipes ont le même nombre de points !"
 	}
-	"Intermission_Header"
+	"System_Intermission_Header"
 	{
 		"fr"		"Entracte !"
 	}
-	"Intermission_Body"
+	"System_Intermission_Body"
 	{
 		"fr"		"Pause ! Il est temps de voter pour la prochaine carte."
 	}
@@ -117,13 +150,23 @@
 	{
 		"fr"		"ROCKET JUMP JUSQU'À LA FIN !"
 	}
+	"Bossgame1_PlayerReachedEndFirst"
+	{
+		"#format"		"{1:s}"
+		"fr"		"{1} a atteint la fin en premier ! (Point bonus !)"
+	}
 	"Bossgame2_Caption"
 	{
 		"fr"		"SORTEZ DE L'USINE !"
 	}
+	"Bossgame2_PlayerReachedEndFirst"
+	{
+		"#format"		"{1:s}"
+		"fr"		"{1} s'est échappé de l'usine en premier ! (Point bonus !)"
+	}
 	"Bossgame3_Caption"
 	{
-		"fr"		"BATTEZ L'AUTRE ÉQUIPE !"
+		"fr"		"RESTEZ SUR LE BLOC VERT !"
 	}
 	"Bossgame4_Caption"
 	{
@@ -133,13 +176,67 @@
 	{
 		"fr"		"ATTEIGNEZ L'OBJECTIF !"
 	}
+	"Bossgame5_PlayerReachedEndFirst"
+	{
+		"#format"		"{1:s}"
+		"fr"		"{1} a atteint l'objectif en premier ! (Point bonus !)"
+	}
 	"Bossgame6_Caption"
 	{
 		"fr"		"DÉTRUISEZ LE PLUS DE TONNEAUX !"
 	}
-	"Bossgame7_Caption"
+	"Bossgame8_Caption_CountTheProps"
 	{
-		"fr"		""
+		"fr"		"COMPTEZ LES ACCESSOIRES !"
+	}
+	"Bossgame8_Caption_GetReady"
+	{
+		"fr"		"SOYEZ PRÊTS..."
+	}
+	"Bossgame8_Caption_CorrectAnswerWas_Hidden"
+	{
+		"fr"		"LA RÉPONSE CORRECTE ÉTAIT...\n???"
+	}
+	"Bossgame8_Caption_CorrectAnswerWas_Visible"
+	{
+		"#format"		"{1:i}"
+		"fr"		"LA RÉPONSE CORRECTE ÉTAIT...\n{1} !"
+	}
+	"Bossgame8_Caption_ChooseARoom"
+	{
+		"#format"		"{1:s},{2:i},{3:i},{4:i},{5:i}"
+		"fr"		"Combien de {1} il y avait ? Rentrez dans la bonne pièce !\nPièce A : {2}   Pièce B : {3}   Pièce C : {4}\nTemps restant : {5}"
+	}
+	"Bossgame8_PropType_Dispensers"
+	{
+		"fr"		"Distributeurs"
+	}
+	"Bossgame8_PropType_AmmoPacks"
+	{
+		"fr"		"Boîtes de Munitions"
+	}
+	"Bossgame8_PropType_Barrels"
+	{
+		"fr"		"Tonneaux"
+	}
+	"Bossgame8_PropType_Chairs"
+	{
+		"fr"		"Chaises"
+	}
+	"Bossgame8_Annotation_AnswerRoomA"
+	{
+		"#format"		"{1:i}"
+		"fr"		"Pièce A : {1}"
+	}
+	"Bossgame8_Annotation_AnswerRoomB"
+	{
+		"#format"		"{1:i}"
+		"fr"		"Pièce B : {1}"
+	}
+	"Bossgame8_Annotation_AnswerRoomC"
+	{
+		"#format"		"{1:i}"
+		"fr"		"Pièce C : {1}"
 	}
 	"Minigame1_Caption"
 	{
@@ -163,8 +260,13 @@
 	}
 	"Minigame6_SayTheWord_CaptionFormatted"
 	{
-		"#format"	"{1:s}"
+		"#format"		"{1:s}"
 		"fr"		"DITES LE MOT !\n{1}"
+	}
+	"Minigame6_SayTheWord_PlayerSaidWordFirst"
+	{
+		"#format"		"{1:s}"
+		"fr"		"{1} a dit le mot en premier ! (Point bonus !)"
 	}
 	"Minigame7_Caption"
 	{
@@ -172,13 +274,18 @@
 	}
 	"Minigame8_CaptionFormatted"
 	{
-		"#format"	"{1:s}"
+		"#format"		"{1:s}"
 		"fr"		"RÉPONDEZ À LA QUESTION !\n{1} = ?"
 	}
 	"Minigame8_CorrectAnswerWas"
 	{
-		"#format"	"{1:s},{2:i}"
-		"fr"		"{1}La bonne réponse était {2} !"
+		"#format"		"{1:i}"
+		"fr"		"La bonne réponse était {1} !"
+	}
+	"Minigame8_PlayerAnsweredFirst"
+	{
+		"#format"		"{1:s}"
+		"fr"		"{1} a repondu correctement en premier ! (Point bonus !)"
 	}
 	"Minigame9_Caption_SimonSaysTaunt"
 	{
@@ -194,19 +301,19 @@
 	}
 	"Minigame9_Caption_SomeoneSaysTaunt"
 	{
-		"fr"		"JACADI A DIT : MOQUEZ-VOUS !"
+		"fr"		"JACQUADI A DIT : MOQUEZ-VOUS !"
 	}
 	"Minigame9_Caption_SomeoneSaysJump"
 	{
-		"fr"		"JACADI A DIT : SAUTEZ !"
+		"fr"		"JACQUADI A DIT : SAUTEZ !"
 	}
 	"Minigame9_Caption_SomeoneSaysCrouch"
 	{
-		"fr"		"JACADI A DIT : ACCROUPISSEZ-VOUS !"
+		"fr"		"JACQUADI A DIT : ACCROUPISSEZ-VOUS !"
 	}
 	"Minigame9_Caption_SimonDidntSayIt"
 	{
-		"fr"		"(Jacques n'a rien dit..)"
+		"fr"		"(Jacques n'a rien dit...)"
 	}
 	"Minigame10_KamikazeIsHere"
 	{
@@ -254,15 +361,15 @@
 	}
 	"Minigame15_Caption_Dispenser"
 	{
-		"fr"		"CONTRUISEZ UN DISTRIBUTEUR !"
+		"fr"		"CONSTRUISEZ UN DISTRIBUTEUR !"
 	}
 	"Minigame15_Caption_Teleporter"
 	{
-		"fr"		"CONTRUISEZ UN TÉLÉPORTEUR !"
+		"fr"		"CONSTRUISEZ UN TÉLÉPORTEUR !"
 	}
 	"Minigame15_Caption_Sentry"
 	{
-		"fr"		"CONTRUISEZ UNE MITRAILLEUSE !"
+		"fr"		"CONSTRUISEZ UNE MITRAILLEUSE !"
 	}
 	"Minigame16_Caption"
 	{
@@ -274,7 +381,7 @@
 	}
 	"Minigame17_Caption_GetHitByMedic"
 	{
-		"fr"		"SOYEZ FRAPPÉ PAR UN MEDIC! "
+		"fr"		"SOYEZ FRAPPÉ PAR UN MEDIC ! "
 	}
 	"Minigame18_Caption"
 	{
@@ -324,9 +431,17 @@
 	{
 		"fr"		"BUVEZ !"
 	}
+	"Minigame20_Caption_DontDrink"
+	{
+		"fr"		"NE BUVEZ PAS !"
+	}
 	"Minigame20_Caption_Eat"
 	{
 		"fr"		"MANGEZ !"
+	}
+	"Minigame20_Caption_DontEat"
+	{
+		"fr"		"NE MANGEZ PAS !"
 	}
 	"Minigame21_Caption"
 	{
@@ -338,7 +453,7 @@
 	}
 	"Minigame23_Caption"
 	{
-		"fr"		"DOUBLE SAUT !"
+		"fr"		"TAUNT KILL!"
 	}
 	"Minigame24_Caption"
 	{
@@ -347,6 +462,66 @@
 	"Minigame25_Caption"
 	{
 		"fr"		"JETPACK !"
+	}
+	"Minigame26_Caption_DontLaugh"
+	{
+		"fr"		"NE RIEZ PAS !"
+	}
+	"Minigame26_Caption_MakeThemLaugh_Scout"
+	{
+		"fr"		"FAITES RIRE LE SCOUT !"
+	}
+	"Minigame26_Caption_MakeThemLaugh_Soldier"
+	{
+		"fr"		"FAITES RIRE LE SOLDIER !"
+	}
+	"Minigame26_Caption_MakeThemLaugh_Pyro"
+	{
+		"fr"		"FAITES RIRE LE PYRO !"
+	}
+	"Minigame26_Caption_MakeThemLaugh_Demoman"
+	{
+		"fr"		"FAITES RIRE LE DEMOMAN !"
+	}
+	"Minigame26_Caption_MakeThemLaugh_Engineer"
+	{
+		"fr"		"FAITES RIRE L'HEAVY !"
+	}
+	"Minigame26_Caption_MakeThemLaugh_Medic"
+	{
+		"fr"		"FAITES RIRE LE MEDIC !"
+	}
+	"Minigame26_Caption_MakeThemLaugh_Sniper"
+	{
+		"fr"		"FAITES RIRE LE SNIPER !"
+	}
+	"Minigame26_Caption_MakeThemLaugh_Spy"
+	{
+		"fr"		"FAITES RIRE LE SPY !"
+	}
+	"Minigame27_Caption"
+	{
+		"fr"		"FRAPPEZ UN ENNEMI !"
+	}
+	"Minigame28_Caption"
+	{
+		"fr"		"BOMB JUMP SUR LA PLATEFORME !"
+	}
+	"Minigame29_Caption"
+	{
+		"fr"		"NE TOUCHEZ PERSONNE !"
+	}
+	"Minigame30_Caption_EatASandvich"
+	{
+		"fr"		"EAT A SANDVICH!"
+	}
+	"Minigame30_Caption_HealAMedic"
+	{
+		"fr"		"HEAL A MEDIC!"
+	}
+	"Bossgame7_Caption_TypeTheWords"
+	{
+		"fr"		"ÉCRIVEZ LES MOTS !"
 	}
 	"Bossgame7_Caption_Explain"
 	{
@@ -358,17 +533,17 @@
 	}
 	"Bossgame7_Caption_TimeRemaining"
 	{
-		"#format"	"{1:i}"
-		"fr"		"== MODE SPECTATEUR ==\n\nTemps restant : {1} secondes."
+		"#format"		"{1:i}"
+		"fr"		"== MODE SPECTATEUR ==\n\nTemps restant : {1} secondes"
 	}
 	"Bossgame7_Caption_SayTheWord"
 	{
-		"#format"	"{1:s},{2:s},{3:i}"
-		"fr"		"== ÉCRIVEZ LE MOT ! ==\n\n{1}\n\nMot suivant : {2}\nTemps restant : {3} secondes."
+		"#format"		"{1:s},{2:s},{3:i}"
+		"fr"		"== ÉCRIVEZ LE MOT ! ==\n\n{1}\n\nMot suivant : {2}\nTemps restant : {3} secondes"
 	}
 	"Bossgame7_Caption_WinnerAnnouncement"
 	{
-		"#format"	"{1:s}"
+		"#format"		"{1:s}"
 		"fr"		"== ANNONCE ==\n\nLe gagnant est...\n{1} !"
 	}
 	"Bossgame7_Caption_LevelUpAnnouncement"
@@ -377,17 +552,17 @@
 	}
 	"Bossgame7_Caption_RoundReview"
 	{
-		"#format"	"{1:s}"
+		"#format"		"{1:s}"
 		"fr"		"== REVUE DE LA MANCHE == \n\nLes joueurs ayant tapé le moins de mots sont...\n{1}"
 	}
 	"Bossgame7_Caption_RoundReview_AndMore"
 	{
-		"#format" 	"{1:s},{2:i}"
+		"#format"		"{1:s},{2:i}"
 		"fr"		"{1}\net {2} plus..."
 	}
 	"Bossgame7_Caption_RoundReview_EveryoneSurvives"
 	{
-		"#format" 	"{1:s}"
+		"#format"		"{1:s}"
 		"fr"		"{1}personne !\n\nTout le monde reste vivant !"
 	}
 	"Bossgame7_ClassChangeWarning"
@@ -432,7 +607,7 @@
 	}
 	"SpecialRound4_Description"
 	{
-		"fr"		"Aucun changement de vitesse n'aura lieu dans cette manche !"
+		"fr"		"Aucun changement de vitesse n'aura lieu durant cette manche !"
 	}
 	"SpecialRound5_Name"
 	{
@@ -500,11 +675,11 @@
 	}
 	"SpecialRound13_Name"
 	{
-		"fr"		"Oiseaux uniquement"
+		"fr"		"Squelettes uniquement"
 	}
 	"SpecialRound13_Description"
 	{
-		"fr"		"Archimède ! Non !"
+		"fr"		"Pas de peau autorisée durant cette manche !"
 	}
 	"SpecialRound14_Name"
 	{
@@ -532,7 +707,7 @@
 	}
 	"SpecialRound16_Caption_Points"
 	{
-		"#format"	"{1:i}"
+		"#format"		"{1:i}"
 		"fr"		"Si vous gagnez le mini-jeu, vous obtiendrez {1} points !"
 	}
 	"SpecialRound17_Name"
@@ -541,16 +716,16 @@
 	}
 	"SpecialRound17_Description"
 	{
-		"fr"		"Si vous perdez un mini-jeu, vous serez eliminé ! Le dernier joueur toujours en vie gagne la manche !"
+		"fr"		"Si vous perdez un mini-jeu, vous serez éliminé ! Le dernier joueur toujours en vie gagne la manche !"
 	}
 	"SpecialRound17_Caption_Full"
 	{
-		"#format"	"{1:i},{2:i},{3:s}"
+		"#format"		"{1:i},{2:i},{3:s}"
 		"fr"		"Joueurs en jeu ({1} sur {2})\n{3}"
 	}
 	"SpecialRound17_Caption_AndMore"
 	{
-		"#format"	"{1:s},{2:i}"
+		"#format"		"{1:s},{2:i}"
 		"fr"		"{1} (et {2} plus)"
 	}
 	"SpecialRound18_Name"
@@ -576,5 +751,13 @@
 	"SpecialRound20_Description"
 	{
 		"fr"		"Il n'y aura pour cette manche aucun arrêt entre les mini-jeux !"
+	}
+	"SpecialRound21_Name"
+	{
+		"fr"		"Team Fortress 64"
+	}
+	"SpecialRound21_Description"
+	{
+		"fr"		"Mais ! Où sont passés mes polygones ?"
 	}
 }

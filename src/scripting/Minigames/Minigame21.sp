@@ -6,19 +6,19 @@
 
 public void Minigame21_EntryPoint()
 {
-	AddToForward(GlobalForward_OnMinigameSelected, INVALID_HANDLE, Minigame21_OnMinigameSelected);
-	AddToForward(GlobalForward_OnPlayerStunned, INVALID_HANDLE, Minigame21_OnPlayerStunned);
-	AddToForward(GlobalForward_OnMinigameFinish, INVALID_HANDLE, Minigame21_OnMinigameFinish);
+	AddToForward(g_pfOnMinigameSelected, INVALID_HANDLE, Minigame21_OnMinigameSelected);
+	AddToForward(g_pfOnPlayerStunned, INVALID_HANDLE, Minigame21_OnPlayerStunned);
+	AddToForward(g_pfOnMinigameFinish, INVALID_HANDLE, Minigame21_OnMinigameFinish);
 }
 
 public void Minigame21_OnMinigameSelected(int client)
 {
-	if (MinigameID != 21)
+	if (g_iActiveMinigameId != 21)
 	{
 		return;
 	}
 
-	if (!IsMinigameActive)
+	if (!g_bIsMinigameActive)
 	{
 		return;
 	}
@@ -32,7 +32,8 @@ public void Minigame21_OnMinigameSelected(int client)
 
 	player.Class = TFClass_Scout;
 
-	GiveWeapon(client, 44);
+	player.GiveWeapon(44);
+	player.SetWeaponPrimaryAmmoCount(1);
 
 	player.SetGodMode(false);
 	player.SetHealth(1000);
@@ -41,7 +42,7 @@ public void Minigame21_OnMinigameSelected(int client)
 
 public void Minigame21_OnPlayerStunned(int stunner, int victim)
 {
-	if (!IsMinigameActive || MinigameID != 21)
+	if (!g_bIsMinigameActive || g_iActiveMinigameId != 21)
 	{
 		return;
 	}
@@ -50,14 +51,14 @@ public void Minigame21_OnPlayerStunned(int stunner, int victim)
 
 	if (player.IsValid && player.IsParticipating)
 	{
-		ClientWonMinigame(stunner);
-		GiveWeapon(stunner, 0);
+		player.TriggerSuccess();
+		player.GiveWeapon(0);
 	}
 }
 
 public void Minigame21_OnMinigameFinish()
 {
-	if (IsMinigameActive && MinigameID == 21)
+	if (g_bIsMinigameActive && g_iActiveMinigameId == 21)
 	{
 		RemoveAllStunballEntities();
 	}

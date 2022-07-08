@@ -1,43 +1,45 @@
 /**
  * MicroTF2 - Bossgame 2
  * 
- * Escape route
+ * Escape from the Factory
  */
 
-bool Bossgame2_CanCheckPosition = false;
+bool g_bBossgame2CanCheckWinArea = false;
+bool g_bBossgame2HasAnyPlayerWon = false;
 
 public void Bossgame2_EntryPoint()
 {
-	AddToForward(GlobalForward_OnTfRoundStart, INVALID_HANDLE, Bossgame2_OnTfRoundStart);
-	AddToForward(GlobalForward_OnMinigameSelected, INVALID_HANDLE, Bossgame2_OnSelection);
-	AddToForward(GlobalForward_OnMinigameSelectedPre, INVALID_HANDLE, Bossgame2_OnMinigameSelectedPre);
-	AddToForward(GlobalForward_OnBossStopAttempt, INVALID_HANDLE, Bossgame2_BossCheck);
-	AddToForward(GlobalForward_OnPlayerDeath, INVALID_HANDLE, Bossgame2_OnPlayerDeath);
+	AddToForward(g_pfOnTfRoundStart, INVALID_HANDLE, Bossgame2_OnTfRoundStart);
+	AddToForward(g_pfOnMinigameSelected, INVALID_HANDLE, Bossgame2_OnSelection);
+	AddToForward(g_pfOnMinigameSelectedPre, INVALID_HANDLE, Bossgame2_OnMinigameSelectedPre);
+	AddToForward(g_pfOnBossStopAttempt, INVALID_HANDLE, Bossgame2_BossCheck);
+	AddToForward(g_pfOnPlayerDeath, INVALID_HANDLE, Bossgame2_OnPlayerDeath);
 }
 
 public void Bossgame2_OnMinigameSelectedPre()
 {
-	if (BossgameID == 2)
+	if (g_iActiveBossgameId == 2)
 	{
-		float pos[3] = { 5116.0, 2204.0, 503.0 };
+		Bossgame2_SendInput("logic_relay", "ERBoss_InitRelay", "Trigger");
 
-		Bossgame2_SpawnTriggerer(pos);
+		g_bIsBlockingKillCommands = true;
+		g_eDamageBlockMode = EDamageBlockMode_AllPlayers;
 
-		IsBlockingDamage = false;
-		IsBlockingDeathCommands = true;
-		IsOnlyBlockingDamageByPlayers = true;
-		Bossgame2_CanCheckPosition = false;
+		g_bBossgame2CanCheckWinArea = false;
+		g_bBossgame2HasAnyPlayerWon = false;
+
+		CreateTimer(0.75, Bossgame2_HurtTimer, _, TIMER_REPEAT|TIMER_FLAG_NO_MAPCHANGE);
 	}
 }
 
 public void Bossgame2_OnSelection(int client)
 {
-	if (BossgameID != 2)
+	if (g_iActiveBossgameId != 2)
 	{
 		return;
 	}
 
-	if (!IsMinigameActive)
+	if (!g_bIsMinigameActive)
 	{
 		return;
 	}
@@ -54,24 +56,24 @@ public void Bossgame2_OnSelection(int client)
 	player.SetGodMode(false);
 	player.SetCollisionsEnabled(false);
 	player.ResetHealth();
-
-	ResetWeapon(client, false);
+	player.ResetWeapon(false);
 
 	float vel[3] = { 0.0, 0.0, 0.0 };
-	float ang[3] = { 0.0, 0.0, 0.0 };
+	float ang[3] = { 0.0, 144.0, 0.0 };
 	float pos[3];
 
 	int column = client;
 	int row = 0;
+
 	while (column > 6)
 	{
 		column = column - 6;
 		row = row + 1;
 	}
 
-	pos[0] = 4250.0 + float(row*70);
-	pos[1] = 2700.0 - float(column*70);
-	pos[2] = 0.0;
+	pos[0] = 4417.0 + float(row*70); 
+	pos[1] = 2164.0 + float(column*70);
+	pos[2] = 2.0;
 
 	TeleportEntity(client, pos, ang, vel);
 }
@@ -87,35 +89,45 @@ public void Bossgame2_OnTfRoundStart()
 
 		if (strcmp(entityName, "plugin_Bossgame2_WinArea") == 0)
 		{
-			HookSingleEntityOutput(entity, "OnStartTouch", Bossgame2_OnTriggerTouched, false);
+			SDKHook(entity, SDKHook_StartTouch, Bossgame2_OnTriggerTouched);
 			break;
 		}
 	}
 }
 
-public void Bossgame2_OnTriggerTouched(const char[] output, int caller, int activatorId, float delay)
+public Action Bossgame2_OnTriggerTouched(int entity, int other)
 {
-	if (!Bossgame2_CanCheckPosition)
+	if (!g_bBossgame2CanCheckWinArea || g_iActiveBossgameId != 2 || !g_bIsMinigameActive)
 	{
-		return;
+		return Plugin_Continue;
 	}
 
-	Player activator = new Player(activatorId);
+	Player activator = new Player(other);
 
 	if (activator.IsValid && activator.IsAlive && activator.IsParticipating && activator.Status == PlayerStatus_NotWon)
 	{
-		ClientWonMinigame(activatorId);
+		activator.TriggerSuccess();
+
+		if (!g_bBossgame2HasAnyPlayerWon && Config_BonusPointsEnabled())
+		{
+			activator.Score++;
+
+			Bossgame2_NotifyPlayerComplete(activator);
+			g_bBossgame2HasAnyPlayerWon = true;
+		}
 	}
+
+	return Plugin_Continue;
 }
 
 public void Bossgame2_OnPlayerDeath(int victimId, int attacker)
 {
-	if (BossgameID != 2)
+	if (g_iActiveBossgameId != 2)
 	{
 		return;
 	}
 
-	if (!IsMinigameActive)
+	if (!g_bIsMinigameActive)
 	{
 		return;
 	}
@@ -130,17 +142,17 @@ public void Bossgame2_OnPlayerDeath(int victimId, int attacker)
 
 public void Bossgame2_BossCheck()
 {
-	if (BossgameID != 2)
+	if (g_iActiveBossgameId != 2)
 	{
 		return;
 	}
 
-	if (!IsMinigameActive)
+	if (!g_bIsMinigameActive)
 	{
 		return;
 	}
 	
-	Bossgame2_CanCheckPosition = true;
+	g_bBossgame2CanCheckWinArea = true;
 
 	int alivePlayers = 0;
 	int successfulPlayers = 0;
@@ -177,16 +189,74 @@ public void Bossgame2_BossCheck()
 	}
 }
 
-public void Bossgame2_SpawnTriggerer(float pos[3])
+public void Bossgame2_SendInput(const char[] entityClass, const char[] name, const char[] input)
 {
-	int entity = CreateEntityByName("prop_physics");
-
-	if (IsValidEdict(entity))
+	int entity = -1;
+	char entityName[32];
+	
+	while ((entity = FindEntityByClassname(entity, entityClass)) != INVALID_ENT_REFERENCE)
 	{
-		DispatchKeyValue(entity, "model", "models/props_farm/wooden_barrel.mdl");
-		DispatchSpawn(entity);
+		GetEntPropString(entity, Prop_Data, "m_iName", entityName, sizeof(entityName));
 
-		TeleportEntity(entity, pos, NULL_VECTOR, NULL_VECTOR);
-		CreateTimer(0.25, Timer_RemoveEntity, entity);
+		if (strcmp(entityName, name) == 0)
+		{
+			AcceptEntityInput(entity, input, -1, -1, -1);
+			//break;
+		}
+	}
+}
+
+public Action Bossgame2_HurtTimer(Handle timer)
+{
+	if (g_iActiveBossgameId == 2 && g_bIsMinigameActive && !g_bIsMinigameEnding) 
+	{
+		for (int i = 1; i <= MaxClients; i++)
+		{
+			Player player = new Player(i);
+
+			if (player.IsValid && player.IsAlive && player.IsParticipating)
+			{
+				if (player.Health > 0)
+				{
+					player.Health--;
+				}
+				else
+				{
+					player.Kill();
+				}
+			}
+		}
+
+		return Plugin_Continue;
+	}
+
+	return Plugin_Stop; 
+}
+
+void Bossgame2_NotifyPlayerComplete(Player invoker)
+{
+	char name[64];
+	
+	if (invoker.Team == TFTeam_Red)
+	{
+		Format(name, sizeof(name), "{red}%N{default}", invoker.ClientId);
+	}
+	else if (invoker.Team == TFTeam_Blue)
+	{
+		Format(name, sizeof(name), "{blue}%N{default}", invoker.ClientId);
+	}
+	else
+	{
+		Format(name, sizeof(name), "{white}%N{default}", invoker.ClientId);
+	}
+
+	for (int i = 1; i <= MaxClients; i++)
+	{
+		Player player = new Player(i);
+
+		if (player.IsValid && !player.IsBot)
+		{
+			player.PrintChatText("%T", "Bossgame2_PlayerReachedEndFirst", i, name);
+		}
 	}
 }

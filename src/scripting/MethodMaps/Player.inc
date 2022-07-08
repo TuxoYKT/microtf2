@@ -17,7 +17,7 @@ methodmap Player __nullable__
     {
         public get()
         {
-            return IsClientInGame(this.ClientId);
+            return this.ClientId > 0 && this.ClientId <= MaxClients && IsClientInGame(this.ClientId) && !IsClientSourceTV(this.ClientId) && !IsClientInKickQueue(this.ClientId);
         }
     }
 
@@ -54,6 +54,7 @@ methodmap Player __nullable__
         public set(TFClassType value)
         {
             TF2_SetPlayerClass(this.ClientId, value);
+            TF2_RemoveAllWeapons(this.ClientId);
         }
     }
 
@@ -106,6 +107,18 @@ methodmap Player __nullable__
         }
     }
 
+    property float MaxSpeed
+    {
+        public get()
+        {
+            return GetEntPropFloat(this.ClientId, Prop_Send, "m_flMaxspeed");
+        }
+        public set(float value)
+        {
+	        SetEntPropFloat(this.ClientId, Prop_Send, "m_flMaxspeed", value);
+        }
+    }
+
     property bool IsValid
     {
         public get()
@@ -130,11 +143,11 @@ methodmap Player __nullable__
     {
         public get()
         {
-            return IsPlayerParticipant[this.ClientId];
+            return g_bIsPlayerParticipant[this.ClientId];
         }
         public set(bool value)
         {
-            IsPlayerParticipant[this.ClientId] = value;
+            g_bIsPlayerParticipant[this.ClientId] = value;
         }
     }
 
@@ -142,11 +155,11 @@ methodmap Player __nullable__
     {
         public get()
         {
-            return PlayerScore[this.ClientId];
+            return g_iPlayerScore[this.ClientId];
         }
         public set(int value)
         {
-            PlayerScore[this.ClientId] = value;
+            g_iPlayerScore[this.ClientId] = value;
         }
     }
 
@@ -154,11 +167,11 @@ methodmap Player __nullable__
     {
         public get()
         {
-            return PlayerStatus[this.ClientId];
+            return g_ePlayerStatus[this.ClientId];
         }
         public set(PlayerStatuses value)
         {
-            PlayerStatus[this.ClientId] = value;
+            g_ePlayerStatus[this.ClientId] = value;
         }
     }
 
@@ -166,11 +179,11 @@ methodmap Player __nullable__
     {
         public get()
         {
-            return PlayerMinigamesWon[this.ClientId];
+            return g_iPlayerMinigamesWon[this.ClientId];
         }
         public set(int value)
         {
-            PlayerMinigamesWon[this.ClientId] = value;
+            g_iPlayerMinigamesWon[this.ClientId] = value;
         }
     }
 
@@ -178,11 +191,11 @@ methodmap Player __nullable__
     {
         public get()
         {
-            return PlayerMinigamesLost[this.ClientId];
+            return g_iPlayerMinigamesLost[this.ClientId];
         }
         public set(int value)
         {
-            PlayerMinigamesLost[this.ClientId] = value;
+            g_iPlayerMinigamesLost[this.ClientId] = value;
         }
     }
 
@@ -190,11 +203,23 @@ methodmap Player __nullable__
     {
         public get()
         {
-            return IsPlayerWinner[this.ClientId];
+            return g_bIsPlayerWinner[this.ClientId];
         }
         public set(bool value)
         {
-            IsPlayerWinner[this.ClientId] = value;
+            g_bIsPlayerWinner[this.ClientId] = value;
+        }
+    }
+
+    property bool IsUsingLegacyDirectX
+    {
+        public get()
+        {
+            return g_bIsPlayerUsingLegacyDirectX[this.ClientId];
+        }
+        public set(bool value)
+        {
+            g_bIsPlayerUsingLegacyDirectX[this.ClientId] = value;
         }
     }
 
@@ -232,7 +257,7 @@ methodmap Player __nullable__
 
     public void SetCollisionsEnabled(bool enabled)
     {
-        SetEntData(this.ClientId, Offset_Collision, enabled ? 5 : 2, 4, true);
+        SetEntData(this.ClientId, g_oCollisionGroup, enabled ? 5 : 2, 4, true);
     }
 
     public void SetGravity(float gravity)
@@ -240,34 +265,147 @@ methodmap Player __nullable__
         SetEntityGravity(this.ClientId, gravity);
     }
 
+    property int DefaultHealth
+    {
+        public get() 
+        {
+            int health = 125;
+
+            switch (this.Class)
+            {
+                case TFClass_Soldier: health = 200;
+                case TFClass_Pyro: health = 175;
+                case TFClass_DemoMan: health = 175;
+                case TFClass_Heavy: health = 300;
+                case TFClass_Medic: health = 150;
+            }
+
+            return health;
+        }
+    }
+
     public void SetHealth(int health)
     {
-		int maxHealthOffset = FindDataMapInfo(this.ClientId, "m_iMaxHealth");
-		int healthOffset = FindDataMapInfo(this.ClientId, "m_iHealth");
+        int maxHealthOffset = FindDataMapInfo(this.ClientId, "m_iMaxHealth");
+        int healthOffset = FindDataMapInfo(this.ClientId, "m_iHealth");
 
-		if (maxHealthOffset == -1 || healthOffset == -1)
-		{
-			SetFailState("Failed to find m_iMaxHealth / m_iHealth on CTFPlayer.");
-		}
+        if (maxHealthOffset == -1 || healthOffset == -1)
+        {
+            SetFailState("Failed to find m_iMaxHealth / m_iHealth on CTFPlayer.");
+        }
+        
+        int maxHealth = health;
 
-		SetEntData(this.ClientId, maxHealthOffset, health, 4, true);
-		SetEntData(this.ClientId, healthOffset, health, 4, true);
+        if (health < this.DefaultHealth)
+        {
+            maxHealth = this.DefaultHealth;
+        }
+
+        SetEntData(this.ClientId, maxHealthOffset, maxHealth, 4, true);
+        SetEntData(this.ClientId, healthOffset, health, 4, true);
+    }
+
+    property int Health 
+    {
+        public get()
+        {
+            return GetClientHealth(this.ClientId);
+        }
+        public set(int value)
+        {
+            this.SetHealth(value);
+        }
+    }
+
+    property int ActiveWeaponEntityEdict
+    {
+        public get()
+        {
+            //Credit to Tylerst & Powerlord for this code.
+            int weapon = GetEntDataEnt2(this.ClientId, g_oPlayerActiveWeapon);
+
+            if (IsValidEntity(weapon))
+            {
+                return weapon;
+            }
+            else
+            {
+                return -1;
+            }
+        }
+    }
+
+    property int ActiveWeaponItemIndex
+    {
+        public get()
+        {
+            int entity = this.ActiveWeaponEntityEdict;
+
+            if (entity == -1)
+            {
+                return -1;
+            }
+
+            return GetEntProp(entity, Prop_Send, "m_iItemDefinitionIndex");
+        }
+    }
+
+    property int Metal
+    {
+        public get()
+        {
+	        return GetEntProp(this.ClientId, Prop_Data, "m_iAmmo", 4, 3);
+        }
+
+        public set(int value)
+        {
+            SetEntProp(this.ClientId, Prop_Data, "m_iAmmo", value, 4, 3);
+        }
+    }
+
+    property float ChargeMeter
+    {
+        public get()
+        {
+            return GetEntPropFloat(this.ClientId, Prop_Send, "m_flChargeMeter");
+        }
+
+        public set(float value)
+        {
+            // Float scale: 0.0 = 0%, 100.0 = 100%
+	        SetEntPropFloat(this.ClientId, Prop_Send, "m_flChargeMeter", value);
+        }
+    }
+
+    property float ChargeLevel
+    {
+        public get()
+        {
+            int secondaryWeapon = GetPlayerWeaponSlot(this.ClientId, 1);
+
+            if (IsValidEntity(secondaryWeapon) && HasEntProp(secondaryWeapon, Prop_Send, "m_flChargeLevel"))
+            {
+                return GetEntPropFloat(secondaryWeapon, Prop_Send, "m_flChargeLevel");
+            }
+
+            return 0.0;
+        }
+
+        public set(float value)
+        {
+            int secondaryWeapon = GetPlayerWeaponSlot(this.ClientId, 1);
+
+            if (IsValidEntity(secondaryWeapon) && HasEntProp(secondaryWeapon, Prop_Send, "m_flChargeLevel"))
+            {
+                // Float scale: 0.0 = 0%, 1.0 = 100%
+                SetEntPropFloat(secondaryWeapon, Prop_Send, "m_flChargeLevel", value);
+            }
+        }
     }
 
     public void ResetHealth()
     {
-		int health = 125;
-
-		switch (this.Class)
-		{
-			case TFClass_Soldier: health = 200;
-			case TFClass_Pyro: health = 175;
-			case TFClass_DemoMan: health = 175;
-			case TFClass_Heavy: health = 300;
-			case TFClass_Medic: health = 150;
-		}
-		
-		this.SetHealth(health);
+		this.SetHealth(this.DefaultHealth);
     }
 
     public void Kill()
@@ -312,22 +450,8 @@ methodmap Player __nullable__
 
     public void SetThirdPersonMode(bool enabled)
     {
-        if (enabled)
-        {
-            int flags = GetCommandFlags("thirdperson");
-
-            SetCommandFlags("thirdperson", flags & (~FCVAR_CHEAT));
-            ClientCommand(this.ClientId, "thirdperson");
-            SetCommandFlags("thirdperson", flags);
-        }
-        else
-        {
-            int flags = GetCommandFlags("firstperson");
-
-            SetCommandFlags("firstperson", flags & (~FCVAR_CHEAT));
-            ClientCommand(this.ClientId, "firstperson");
-            SetCommandFlags("firstperson", flags);
-        }
+        SetVariantInt(view_as<int>(enabled));
+        AcceptEntityInput(this.ClientId, "SetForcedTauntCam");
     }
 
     public void SetViewModelVisible(bool visible)
@@ -344,6 +468,36 @@ methodmap Player __nullable__
             SetEntityRenderColor(weapon, 255, 255, 255, (visible ? 255 : 0));
             SetEntityRenderMode(weapon, (visible ? RENDER_NORMAL : RENDER_TRANSCOLOR));
         }
+    }
+
+    public void AddCondition(TFCond condition, float duration = TFCondDuration_Infinite, int inflictor = 0)
+    {
+        TF2_AddCondition(this.ClientId, condition, duration, inflictor);
+    }
+
+    public void RemoveCondition(TFCond condition)
+    {
+        TF2_RemoveCondition(this.ClientId, condition);
+    }
+
+    public void ClearConditions()
+    {
+        this.RemoveCondition(TFCond_Disguised);
+        this.RemoveCondition(TFCond_Disguising);
+        this.RemoveCondition(TFCond_Jarated);
+        this.RemoveCondition(TFCond_OnFire);
+        this.RemoveCondition(TFCond_Bonked);
+        this.RemoveCondition(TFCond_Dazed);
+        this.RemoveCondition(TFCond_Bleeding);
+        this.RemoveCondition(TFCond_RuneHaste);
+        this.RemoveCondition(TFCond_CritCola);
+        this.RemoveCondition(TFCond_HalloweenCritCandy);
+        this.RemoveCondition(TFCond_Taunting);
+    }
+
+    public bool HasCondition(TFCond condition)
+    {
+        return TF2_IsPlayerInCondition(this.ClientId, condition);
     }
 
     public void TryDestroyPlayerBuilding(bool cleanDestroy, char[] entityClassname, TFObjectMode objectMode = TFObjectMode_None)
@@ -394,7 +548,7 @@ methodmap Player __nullable__
         this.DestroyPlayerTeleporterExit(cleanDestroy);
     }
 
-    public void SetAmmo(int ammoCount, bool primaryAmmo = true, bool clipAmmo = true)
+    public void SetWeaponPrimaryAmmoCount(int count)
     {
         int weaponHandleId = FindSendPropInfo("CAI_BaseNPC", "m_hActiveWeapon");
 
@@ -410,33 +564,65 @@ methodmap Player __nullable__
             return;
         }
 
-        int ammoType = GetEntProp(entity, Prop_Send, "m_iPrimaryAmmoType", 1)*4;
         int ammo = FindSendPropInfo("CTFPlayer", "m_iAmmo");
-        int clip = FindSendPropInfo("CBaseCombatWeapon", "m_iClip1");
 
         if (ammo <= 0)
         {
             return;
         }
 
+        int offset = GetEntProp(entity, Prop_Send, "m_iPrimaryAmmoType", 1)*4;
+
+        SetEntData(this.ClientId, g_oPlayerAmmo+offset, count, 4, true);
+    }
+
+    public void SetWeaponClipAmmoCount(int count)
+    {
+        int weaponHandleId = FindSendPropInfo("CAI_BaseNPC", "m_hActiveWeapon");
+
+        if (weaponHandleId <= 0)
+        {
+            return;
+        }
+
+        int entity = GetEntDataEnt2(this.ClientId, weaponHandleId);
+
+        if (!IsValidEntity(entity)) 
+        {
+            return;
+        }
+
+        int clip = FindSendPropInfo("CBaseCombatWeapon", "m_iClip1");
+
         if (clip <= 0)
         {
             return;
         }
 
+        SetEntData(entity, clip, count, 4, true);
+    }
+
+        // TODO: Remove because having both in one is dumb
+    public void SetAmmo(int ammoCount, bool primaryAmmo = true, bool clipAmmo = true)
+    {
         if (clipAmmo)
         {
-            SetEntData(entity, clip, ammoCount, 4, true);
+            this.SetWeaponClipAmmoCount(ammoCount);
         }
 
         if (primaryAmmo)
         {
-            SetEntData(this.ClientId, ammoType+ammo, ammoCount, 4, true);
+            this.SetWeaponPrimaryAmmoCount(ammoCount);
         }
     }
 
     public void RemoveWearables()
     {
+        if (g_bAllowCosmetics) 
+        {
+            return;
+        }
+
         int entity = -1;
         while ((entity = FindEntityByClassname(entity, "tf_wearable*")) != -1)
         {
@@ -461,14 +647,33 @@ methodmap Player __nullable__
         PrintCenterText(this.ClientId, "%T", translationKey, this.ClientId);
     }
 
-    public void PrintChatText(const char[] text)
+    public void PrintChatText(const char[] text, any ...)
     {
-        CPrintToChat(this.ClientId, "%s%s", PLUGIN_PREFIX, text);
+        char buffer[MAX_BUFFER_LENGTH];
+        char buffer2[MAX_BUFFER_LENGTH];
+        
+        SetGlobalTransTarget(this.ClientId);
+        Format(buffer, sizeof(buffer), "%s", text);
+        VFormat(buffer2, sizeof(buffer2), buffer, 3);
+
+        if (g_iSpecialRoundId == 19)
+        {
+            char rewritten[MAX_BUFFER_LENGTH];
+            ReverseString(buffer2, sizeof(buffer2), rewritten);
+            ReplaceString(rewritten, sizeof(rewritten), "}tluafed{", "{default}");
+            ReplaceString(rewritten, sizeof(rewritten), "}der{", "{red}");
+            ReplaceString(rewritten, sizeof(rewritten), "}eulb{", "{blue}");
+            ReplaceString(rewritten, sizeof(rewritten), "}etihw{", "{white}");
+
+            strcopy(buffer2, sizeof(buffer2), rewritten);
+        }
+
+        CPrintToChat(this.ClientId, "%s%s", PLUGIN_PREFIX, buffer2);
     }
 
-    public void ShowAnnotation(float lifetime, char text[32])
+    public void ShowAnnotation(int attachToEntity, float lifetime, char text[32])
     {
-        ShowAnnotation(this.ClientId, lifetime, text);
+        ShowAnnotation(this.ClientId, attachToEntity, lifetime, text);
     }
 
     public void PrintHintBox(const char[] text)
@@ -483,5 +688,76 @@ methodmap Player __nullable__
         }
 
         EndMessage();
+    }
+
+    public void SetCaption(const char[] text)
+    {
+        SetCaption(this.ClientId, text);
+    }
+
+    public bool HasCaption()
+    {
+        return HasCaption(this.ClientId);
+    }
+
+    public void SetCustomHudText(const char[] text)
+    {
+        SetCustomHudText(this.ClientId, text);
+    }
+
+    public bool HasCustomHudText()
+    {
+        return HasCustomHudText(this.ClientId);
+    }
+
+    public void TriggerSuccess()
+    {
+        bool valid = this.IsValid && this.IsParticipating && this.Status == PlayerStatus_NotWon;
+
+        if (!valid)
+        {
+            return;
+        }
+
+        this.Status = PlayerStatus_Winner;
+
+        if (g_iActiveParticipantCount > 12)
+        {
+            PlaySoundToPlayer(this.ClientId, SYSFX_WINNER);
+        }
+        else
+        {
+            PlaySoundToAll(SYSFX_WINNER);
+        }
+
+        if (this.Team == TFTeam_Blue)
+        {
+            CreateParticle(this.ClientId, "Micro_Win_Blue", 6.0);
+        }
+        else if (this.Team == TFTeam_Red)
+        {
+            CreateParticle(this.ClientId, "Micro_Win_Red", 6.0);
+        }
+    }
+
+    public void GiveWeapon(int weaponItemIndex)
+    {
+        Weapons_EquipWeaponByItemIndex(this.ClientId, weaponItemIndex);
+    }
+
+    public void ResetWeapon(bool viewModel)
+    {
+        Weapons_ResetToMelee(this.ClientId, viewModel);
+    }
+
+    public void PlaySound(const char[] sound)
+    {
+        if (this.IsInGame && !this.IsBot && !g_bIsMapEnding)
+        {
+            char path[MAX_PATH_LENGTH];
+            Sounds_ConvertTokens(sound, path, sizeof(path));
+
+            EmitSoundToClient(this.ClientId, path, SOUND_FROM_PLAYER, SNDCHAN_AUTO, SNDLEVEL_NORMAL, SND_NOFLAGS, SNDVOL_NORMAL, GetSoundMultiplier());
+        }
     }
 }
